@@ -1,7 +1,12 @@
 #!/bin/bash
 
 BIRTH=`date +%s`
-echo "Starting pilot script at `date`..."
+echo "Starting script at `date`..."
+
+# FIXME: from the command line
+JOB_NAME=hpc-annex
+# FIXME: from the command line
+QUEUE_NAME=development
 
 #
 # Download and configure the pilot on the head node before running it
@@ -104,6 +109,7 @@ fi
 # we get our full five minutes to clean up, subtract off how long we've
 # been running already.
 YOUTH=$((`date +%s` - ${BIRTH}))
+# FIXME: from the command-line
 LIFETIME=$((2 * 60 * 60))
 DEATH=300
 REMAINING_LIFETIME=$(((${LIFETIME} - ${YOUTH}) - ${DEATH}))
@@ -182,12 +188,37 @@ fi
 #
 
 #
-# Start the pilot and wait for it to exit.  The EXIT trap above will take
-# care of cleaning up when we exit.
+# Write the SLURM job.
 #
+# FIXME: we'll work on appropriate sizes and durations later.
+#
+echo '#!/bin/bash' > ${PILOT_DIR}/stampede2.slurm
+echo "
+#SBATCH -J ${JOB_NAME}
+#SBATCH -o ${PILOT_DIR}/%j.out
+#SBATCH -e ${PILOT_DIR}/%j.err
+#SBATCH -p ${QUEUE_NAME}
+#SBATCH -N 1
+#SBATCH -n 1
+#SBATCH -t 02:00:00
 
-echo "... starting HTCondor at `date`."
-. ./condor.sh
-condor_master -f
+# FIXME: ...
+${HOME}/hpc-annex/stampede2.pilot ${PILOT_DIR}
+" >> ${PILOT_DIR}/stampede2.slurm
 
+#
+# Submit the SLURM job.
+#
+echo "Submitting SLURM job..."
+SBATCH_LOGGING=`sbatch ${PILOT_DIR}/stampede2.slurm 2>&1`
+if [[ $? != 0 ]]; then
+    echo "Failed to submit job to SLURM ($?), aborting."
+    echo ${SBATCH_LOGGING}
+    exit 6
+fi
+echo "..done."
+
+# Reset the EXIT trap so that we don't delete the temporary directory
+# that the SLURM job needs.
+trap EXIT
 exit 0

@@ -1,0 +1,15 @@
+#!/bin/bash
+
+PILOT_DIR=$1
+
+function cleanup() {
+    echo "Cleaning up temporary directory (${PILOT_DIR})..."
+    # rm -fr ${PILOT_DIR}
+}
+trap cleanup EXIT
+
+cd ${PILOT_DIR}
+cd condor-*
+. ./condor.sh
+condor_master -f
+exit $?
