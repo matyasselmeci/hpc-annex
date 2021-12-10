@@ -1,12 +1,48 @@
 #!/bin/bash
 
+function usage() {
+    echo "Usage: ${0} \\"
+    echo "       JOB_NAME QUEUE_NAME COLLECTOR TOKEN_FILE LIFETIME PILOT_BIN"
+}
+
+JOB_NAME=$1
+if [[ -z $JOB_NAME ]]; then
+    usage
+    exit 1
+fi
+
+QUEUE_NAME=$2
+if [[ -z $QUEUE_NAME ]]; then
+    usage
+    exit 1
+fi
+
+COLLECTOR=$3
+if [[ -z $COLLECTOR ]]; then
+    usage
+    exit 1
+fi
+
+TOKEN_FILE=$4
+if [[ -z $TOKEN_FILE ]]; then
+    usage
+    exit 1
+fi
+
+LIFETIME=$5
+if [[ -z $LIFETIME ]]; then
+    usage
+    exit 1
+fi
+
+PILOT_BIN=$6
+if [[ -z $PILOT_BIN ]]; then
+    usage
+    exit 1
+fi
+
 BIRTH=`date +%s`
 echo "Starting script at `date`..."
-
-# FIXME: from the command line
-JOB_NAME=hpc-annex
-# FIXME: from the command line
-QUEUE_NAME=development
 
 #
 # Download and configure the pilot on the head node before running it
@@ -14,18 +50,19 @@ QUEUE_NAME=development
 #
 # The following variables are constants.
 #
+
+
 # The binaries must be a tarball named condor-*, and unpacking that tarball
 # must create a directory which also matches condor-*.
-#
+WELL_KNOWN_LOCATION_FOR_BINARIES=https://research.cs.wisc.edu/htcondor/tarball/current/9.3.2/update/condor-9.3.2-20211130-x86_64_CentOS7-stripped.tar.gz
+
 # The configuration must be a tarball which does NOT match condor-*.  It
 # will be unpacked in the root of the directory created by unpacking the
 # binaries and as such should contain files in local/config.d/*.
-#
-
-WELL_KNOWN_COLLECTOR=azaphrael.org
-WELL_KNOWN_TOKEN_FILE=${HOME}/pilot.token
-WELL_KNOWN_LOCATION_FOR_BINARIES=https://research.cs.wisc.edu/htcondor/tarball/current/9.3.2/update/condor-9.3.2-20211130-x86_64_CentOS7-stripped.tar.gz
 WELL_KNOWN_LOCATION_FOR_CONFIGURATION=https://cs.wisc.edu/~tlmiller/hpc-config.tar.gz
+
+# How early should HTCondor exit to make sure we have time to clean up?
+CLEAN_UP_TIME=300
 
 #
 # Create pilot-specific directory on shared storage.  The least-awful way
@@ -47,8 +84,7 @@ fi
 
 function cleanup() {
     echo "Cleaning up temporary directory..."
-    # FIXME
-    # rm -fr ${PILOT_DIR}
+    rm -fr ${PILOT_DIR}
 }
 trap cleanup EXIT
 
@@ -73,7 +109,7 @@ fi
 #
 echo "Downloading binaries..."
 BINARIES_FILE=`basename ${WELL_KNOWN_LOCATION_FOR_BINARIES}`
-CURL_LOGGING=`curl -fsSL ${WELL_KNOWN_LOCATION_FOR_BINARIES} -o ${BINARIES_FILE} $2>&1`
+CURL_LOGGING=`curl -fsSL ${WELL_KNOWN_LOCATION_FOR_BINARIES} -o ${BINARIES_FILE} 2>&1`
 if [[ $? != 0 ]]; then
     echo "Failed to download configuration from '${WELL_KNOWN_LOCATION_FOR_BINARIES}', aborting."
     echo ${CURL_LOGGING}
@@ -106,13 +142,10 @@ if [[ $? != 0 ]]; then
 fi
 
 # It may have take some time to get everything installed, so to make sure
-# we get our full five minutes to clean up, subtract off how long we've
-# been running already.
+# we get our full clean-up time, subtract off how long we've been running
+# already.
 YOUTH=$((`date +%s` - ${BIRTH}))
-# FIXME: from the command-line
-LIFETIME=$((2 * 60 * 60))
-DEATH=300
-REMAINING_LIFETIME=$(((${LIFETIME} - ${YOUTH}) - ${DEATH}))
+REMAINING_LIFETIME=$(((${LIFETIME} - ${YOUTH}) - ${CLEAN_UP_TIME}))
 
 echo "Converting to a pilot..."
 rm local/config.d/00-personal-condor
@@ -121,7 +154,7 @@ use role:execute
 use security:recommended_v9_0
 use feature:PartitionableSLot
 
-COLLECTOR_HOST = ${WELL_KNOWN_COLLECTOR}
+COLLECTOR_HOST = ${COLLECTOR}
 
 # We shouldn't ever actually need this, but it's convenient for testing.
 SHARED_PORT_PORT = 0
@@ -152,7 +185,9 @@ CCB_ADDRESS = \$(COLLECTOR_HOST)
 # Rather than figure out why things start falling apart at 68 jobs, let's
 # just have a plausible reason for having fewer.
 #
-NUM_CPUS = \$(DETECTED_MEMORY) / 2048
+# FIXME: this should probably be done with quantize(), instead.
+#
+NUM_CPUS = \$(DETECTED_MEMORY) / 3072
 
 #
 # Commit suicide after being idle for five minutes.
@@ -168,7 +203,7 @@ MASTER.DAEMON_SHUTDOWN_FAST = (CurrentTime - DaemonStartTime) > ${REMAINING_LIFE
 
 mkdir local/passwords.d
 mkdir local/tokens.d
-cp ${WELL_KNOWN_TOKEN_FILE} local/tokens.d
+cp ${TOKEN_FILE} local/tokens.d
 
 #
 # Unpack the configuration on top.
@@ -202,8 +237,7 @@ echo "
 #SBATCH -n 1
 #SBATCH -t 02:00:00
 
-# FIXME: ...
-${HOME}/hpc-annex/stampede2.pilot ${PILOT_DIR}
+${PILOT_BIN} ${PILOT_DIR}
 " >> ${PILOT_DIR}/stampede2.slurm
 
 #
