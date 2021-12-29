@@ -2,7 +2,9 @@
 
 function usage() {
     echo "Usage: ${0} \\"
-    echo "       JOB_NAME QUEUE_NAME COLLECTOR TOKEN_FILE LIFETIME PILOT_BIN"
+    echo "       JOB_NAME QUEUE_NAME COLLECTOR TOKEN_FILE LIFETIME PILOT_BIN \\"
+    echo "       OWNERS"
+    echo "where OWNERS is a comma-separated list"
 }
 
 JOB_NAME=$1
@@ -37,6 +39,12 @@ fi
 
 PILOT_BIN=$6
 if [[ -z $PILOT_BIN ]]; then
+    usage
+    exit 1
+fi
+
+OWNERS=$7
+if [[ -z $OWNERS ]]; then
     usage
     exit 1
 fi
@@ -198,6 +206,11 @@ STARTD_NOCLAIM_SHUTDOWN = 300
 # Don't run for more than two hours, to make sure we have time to clean up.
 #
 MASTER.DAEMON_SHUTDOWN_FAST = (CurrentTime - DaemonStartTime) > ${REMAINING_LIFETIME}
+
+#
+# Only start jobs from the specified owner.
+#
+START = \$(START) && stringListMember( Owner, \"${OWNERS}\" )
 
 " > local/config.d/00-basic-pilot
 
