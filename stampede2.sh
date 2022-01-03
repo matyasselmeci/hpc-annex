@@ -3,7 +3,7 @@
 function usage() {
     echo "Usage: ${0} \\"
     echo "       JOB_NAME QUEUE_NAME COLLECTOR TOKEN_FILE LIFETIME PILOT_BIN \\"
-    echo "       OWNERS"
+    echo "       OWNERS CORES"
     echo "where OWNERS is a comma-separated list"
 }
 
@@ -45,6 +45,12 @@ fi
 
 OWNERS=$7
 if [[ -z $OWNERS ]]; then
+    usage
+    exit 1
+fi
+
+CORES=$8
+if [[ -z $CORES ]]; then
     usage
     exit 1
 fi
@@ -155,6 +161,17 @@ fi
 YOUTH=$((`date +%s` - ${BIRTH}))
 REMAINING_LIFETIME=$(((${LIFETIME} - ${YOUTH}) - ${CLEAN_UP_TIME}))
 
+# Request the appropriate number of cores. (-n)
+#
+# For now, we'll just pass the cores request directly through.  See the
+# above for the reasoning (that we should embed knowledge about the queues
+# in a script that can return errors without a log-in).
+#
+# We have to determine the core count per node before we write out the
+# HTCondor config file, so we can make sure that HTCondor doesn't use
+# more cores than it's actually allocated.
+CORES_PER_NODE=${CORES}
+
 echo "Converting to a pilot..."
 rm local/config.d/00-personal-condor
 echo "
@@ -195,7 +212,12 @@ CCB_ADDRESS = \$(COLLECTOR_HOST)
 #
 # FIXME: Do this with quantize(), instead.
 #
-NUM_CPUS = \$(DETECTED_MEMORY) / 3072
+# NUM_CPUS = \$(DETECTED_MEMORY) / 3072
+
+# Limit the number of CPUs to the number of CPUs requested from SLURM,
+# in case somebody requests less than a full node's worth.  (Should the
+# UI disallow this?)
+NUM_CPUS = ${CORES_PER_NODE}
 
 #
 # Commit suicide after being idle for five minutes.
@@ -248,7 +270,7 @@ fi
 # the wrong queue length.
 MINUTES=$(((${REMAINING_LIFETIME} + ${CLEAN_UP_TIME})/60))
 
-# FIXME: request the appropriate number of nodes and cores. (-n, -N)
+# Alpha 1: request the appropriate number of nodes. (-N)
 
 echo '#!/bin/bash' > ${PILOT_DIR}/stampede2.slurm
 echo "
@@ -257,7 +279,7 @@ echo "
 #SBATCH -e ${PILOT_DIR}/%j.err
 #SBATCH -p ${QUEUE_NAME}
 #SBATCH -N 1
-#SBATCH -n 1
+#SBATCH -n ${CORES_PER_NODE}
 #SBATCH -t ${MINUTES}
 
 ${PILOT_BIN} ${PILOT_DIR}
