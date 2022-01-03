@@ -193,7 +193,7 @@ CCB_ADDRESS = \$(COLLECTOR_HOST)
 # Rather than figure out why things start falling apart at 68 jobs, let's
 # just have a plausible reason for having fewer.
 #
-# FIXME: this should probably be done with quantize(), instead.
+# FIXME: Do this with quantize(), instead.
 #
 NUM_CPUS = \$(DETECTED_MEMORY) / 3072
 
@@ -231,15 +231,20 @@ if [[ $? != 0 ]]; then
 fi
 
 #
-# Add our own customizations to the end.  This includes a more-restrictive
-# START expression and the suicide-if-idle-for-too-long bits.
-#
-
-#
 # Write the SLURM job.
 #
-# FIXME: we'll work on appropriate sizes and durations later.
+
+# Compute the appropriate duration. (-t)
 #
+# This script does NOT embed knowledge about this machine's queue limits.  It
+# seems like it'll be much easier to embed that knowledge in the UI script
+# (rather than transmit a reasonable error back), plus it'll be more user-
+# friendly, since they won't have to log in to get error about requesting
+# the wrong queue length.
+MINUTES=$(((${REMAINING_LIFETIME} + ${CLEAN_UP_TIME})/60))
+
+# FIXME: request the appropriate number of nodes and cores. (-n, -N)
+
 echo '#!/bin/bash' > ${PILOT_DIR}/stampede2.slurm
 echo "
 #SBATCH -J ${JOB_NAME}
@@ -248,7 +253,7 @@ echo "
 #SBATCH -p ${QUEUE_NAME}
 #SBATCH -N 1
 #SBATCH -n 1
-#SBATCH -t 02:00:00
+#SBATCH -t ${MINUTES}
 
 ${PILOT_BIN} ${PILOT_DIR}
 " >> ${PILOT_DIR}/stampede2.slurm
