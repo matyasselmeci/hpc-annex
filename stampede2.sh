@@ -212,6 +212,11 @@ MASTER.DAEMON_SHUTDOWN_FAST = (CurrentTime - DaemonStartTime) > ${REMAINING_LIFE
 #
 START = \$(START) && stringListMember( Owner, \"${OWNERS}\" )
 
+IsAnnex = TRUE
+AnnexName = \"${JOB_NAME}\"
+STARTD_ATTRS = \$(STARTD_ATTRS) AnnexName IsAnnex
+MASTER_ATTRS = \$(MASTER_ATTRS) AnnexName IsAnnex
+
 " > local/config.d/00-basic-pilot
 
 mkdir local/passwords.d
