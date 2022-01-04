@@ -3,7 +3,7 @@
 function usage() {
     echo "Usage: ${0} \\"
     echo "       JOB_NAME QUEUE_NAME COLLECTOR TOKEN_FILE LIFETIME PILOT_BIN \\"
-    echo "       OWNERS CORES"
+    echo "       OWNERS NODES"
     echo "where OWNERS is a comma-separated list"
 }
 
@@ -49,8 +49,8 @@ if [[ -z $OWNERS ]]; then
     exit 1
 fi
 
-CORES=$8
-if [[ -z $CORES ]]; then
+NODES=$8
+if [[ -z $NODES ]]; then
     usage
     exit 1
 fi
@@ -161,17 +161,6 @@ fi
 YOUTH=$((`date +%s` - ${BIRTH}))
 REMAINING_LIFETIME=$(((${LIFETIME} - ${YOUTH}) - ${CLEAN_UP_TIME}))
 
-# Request the appropriate number of cores. (-n)
-#
-# For now, we'll just pass the cores request directly through.  See the
-# above for the reasoning (that we should embed knowledge about the queues
-# in a script that can return errors without a log-in).
-#
-# We have to determine the core count per node before we write out the
-# HTCondor config file, so we can make sure that HTCondor doesn't use
-# more cores than it's actually allocated.
-CORES_PER_NODE=${CORES}
-
 echo "Converting to a pilot..."
 rm local/config.d/00-personal-condor
 echo "
@@ -202,23 +191,6 @@ RUNBENCHMARKS = FALSE
 # We definitely need CCB.
 CCB_ADDRESS = \$(COLLECTOR_HOST)
 
-# On the Knight's Bridge nodes, the hyperthreads-to-RAM ratio is pants.  It
-# should be less queue-specific to just turn off counting hyperthreads.
-#
-# COUNT_HYPERTHREAD_CPUS = FALSE
-#
-# Rather than figure out why things start falling apart at 68 jobs, let's
-# just have a plausible reason for having fewer.
-#
-# FIXME: Do this with quantize(), instead.
-#
-# NUM_CPUS = \$(DETECTED_MEMORY) / 3072
-
-# Limit the number of CPUs to the number of CPUs requested from SLURM,
-# in case somebody requests less than a full node's worth.  (Should the
-# UI disallow this?)
-NUM_CPUS = ${CORES_PER_NODE}
-
 #
 # Commit suicide after being idle for five minutes.
 #
@@ -229,15 +201,34 @@ STARTD_NOCLAIM_SHUTDOWN = 300
 #
 MASTER.DAEMON_SHUTDOWN_FAST = (CurrentTime - DaemonStartTime) > ${REMAINING_LIFETIME}
 
-#
 # Only start jobs from the specified owner.
-#
 START = \$(START) && stringListMember( Owner, \"${OWNERS}\" )
 
+# Advertise the standard annex attributes (master ad for condor_off).
 IsAnnex = TRUE
 AnnexName = \"${JOB_NAME}\"
 STARTD_ATTRS = \$(STARTD_ATTRS) AnnexName IsAnnex
 MASTER_ATTRS = \$(MASTER_ATTRS) AnnexName IsAnnex
+
+#
+# Subsequent configuration is machine-specific.
+#
+
+# Stampede 2 has Knight's Landing queues (4 threads per core) and Skylake
+# queues (2 threads per core).  The "KNL" nodes have 68 cores and 96 GB
+# of RAM; the "SKX" nodes have 48 cores and 192 GB of RAM.  It seems like
+# the KNL cores are different-enough to justify a little judicious
+# deception; since the SKX cores end up at 4 GB of RAM each, that seems
+# reasonable (and it would be a pain to have different config for different
+# queues).
+COUNT_HYPERTHREAD_CPUS = FALSE
+
+# Create dynamic slots 3 GB at a time.  This number was chosen because it's
+# the amount of RAM requested per core on the OS Pool, but we actually bother
+# to set it because we start seeing weird scaling issues with more than 64
+# or so slots.  Since we can't fix that problem right now, avoid it.
+MUST_MODIFY_REQUEST_EXPRS = TRUE
+MODIFY_REQUEST_EXPR_REQUESTMEMORY = max({ 3072, quantize(RequestMemory, {128}) })
 
 " > local/config.d/00-basic-pilot
 
@@ -270,6 +261,11 @@ fi
 # the wrong queue length.
 MINUTES=$(((${REMAINING_LIFETIME} + ${CLEAN_UP_TIME})/60))
 
+# Request the appropriate number of cores. (-n)
+#
+# On Stampede 2, this number is always 1, because TACC only allocates
+# whole nodes.
+
 # Alpha 1: request the appropriate number of nodes. (-N)
 
 echo '#!/bin/bash' > ${PILOT_DIR}/stampede2.slurm
@@ -279,7 +275,7 @@ echo "
 #SBATCH -e ${PILOT_DIR}/%j.err
 #SBATCH -p ${QUEUE_NAME}
 #SBATCH -N 1
-#SBATCH -n ${CORES_PER_NODE}
+#SBATCH -n 1
 #SBATCH -t ${MINUTES}
 
 ${PILOT_BIN} ${PILOT_DIR}
