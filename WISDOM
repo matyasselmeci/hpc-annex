@@ -1,0 +1,49 @@
+    These HPC tools have one front-end (the UI) and a back-end script for
+each HPC machine we care about (Stampede 2, Frontera, Expanse, and Bridges);
+for convenience, each back-end script currently assumes that its corresponding
+pilot script exists, rather than write it out itself.
+
+    Researchers do not interact with the back-end.  They request annexes
+via the front-end, whose interface will be consistent across back-ends and
+as abstract as possible.  The reason we're using a manual front-end tool is
+primarily because of two-factor authentication: we need the user to to
+authorize connections on our behalf.  The front-end will therefore invoke
+SSH with the appropriate options to establish a shared connection, so that
+the front-end can return as soon as possible to the user.
+
+    The front-end will use the shared connection to transfer the back-end
+script(s) to the target machine.  We intend to keep the connection open
+(and the researcher waiting) for error reporting and handling purposes until
+the pilot job goes into the queue.  By that time, the front-end will have
+submitted the local-universe job responsible for maintaining state about
+the newly-created HPC annex, and future invocations of the front-end will
+be able to use the queue to retrieve that state.
+
+    The front-end is responsible for machine-specific logical constraints,
+because it would suck for the user to go through the log-in sign and dance
+and then be told about a logic error we could have detected earlier.
+
+    The back-end is responsible for downloading HTCondor (and eventually,
+the pre-staged Singularity image(s)) and any administrative customization of
+the pilot config from the corresponding well-known locations.  It is also
+responsible for constructing the pilot's on-disk environment in a temporary
+directory and submitting the pilot as a job to the local batch system.  We
+anticipate that the pilot script will be simple: start up HTCondor, clean up
+the temporary directory it occupies after it exits.  The latter may be
+complicated when running more than one node per annex.  Rather than worry
+about what to name the local/ directory before we know which node we're
+running on, it's OK to just create a whole new temporary directory.  (When
+we solve the problem of how to delete the shared pre-staged Singularity
+images, we will have also solved the problem of deleting a shared temporary
+directory, but until then...)
+
+    While it's not necessary for the back-ends to share command-line arguments
+and semantics, it seems like it would make the front-end's job quite a bit
+easier, and so it is strongly encouraged; at a minimum, we really want error
+reporting and failure modes to be the same.  It would also be nice, if it's
+reasonable, for the back-ends to share code as well: maybe not be the same
+script and switching on $ARGV[0], but perhaps sourcing or invoking
+machine-specific functions or functionality appropriately.  (One could source
+the common functions or functionality instead.)  It would be be responsibility
+of the front-end to transfer a machine-specific file for sourcing, if that's
+the implementation.
