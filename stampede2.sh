@@ -3,7 +3,7 @@
 function usage() {
     echo "Usage: ${0} \\"
     echo "       JOB_NAME QUEUE_NAME COLLECTOR TOKEN_FILE LIFETIME PILOT_BIN \\"
-    echo "       OWNERS NODES"
+    echo "       OWNERS NODES MULTI_PILOT_BIN"
     echo "where OWNERS is a comma-separated list"
 }
 
@@ -51,6 +51,12 @@ fi
 
 NODES=$8
 if [[ -z $NODES ]]; then
+    usage
+    exit 1
+fi
+
+MULTI_PILOT_BIN=$9
+if [[ -z $MULTI_PILOT_BIN ]]; then
     usage
     exit 1
 fi
@@ -261,12 +267,11 @@ fi
 # the wrong queue length.
 MINUTES=$(((${REMAINING_LIFETIME} + ${CLEAN_UP_TIME})/60))
 
-# Request the appropriate number of cores. (-n)
+# Request the appropriate number of nodes. (-N)
+# Request the appropriate number of tasks. (-n)
 #
-# On Stampede 2, this number is always 1, because TACC only allocates
-# whole nodes.
-
-# Alpha 1: request the appropriate number of nodes. (-N)
+# On Stampede 2, TACC allocates only whole nodes, so -N = ${NODES}.  Since
+# this is not an MPI job, we want one task per node, and -n = ${NODES}.
 
 echo '#!/bin/bash' > ${PILOT_DIR}/stampede2.slurm
 echo "
@@ -274,11 +279,11 @@ echo "
 #SBATCH -o ${PILOT_DIR}/%j.out
 #SBATCH -e ${PILOT_DIR}/%j.err
 #SBATCH -p ${QUEUE_NAME}
-#SBATCH -N 1
-#SBATCH -n 1
+#SBATCH -N ${NODES}
+#SBATCH -n ${NODES}
 #SBATCH -t ${MINUTES}
 
-${PILOT_BIN} ${PILOT_DIR}
+${MULTI_PILOT_BIN} ${PILOT_BIN} ${PILOT_DIR}
 " >> ${PILOT_DIR}/stampede2.slurm
 
 #
