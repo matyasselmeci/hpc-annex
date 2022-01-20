@@ -3,7 +3,7 @@
 function usage() {
     echo "Usage: ${0} \\"
     echo "       JOB_NAME QUEUE_NAME COLLECTOR TOKEN_FILE LIFETIME PILOT_BIN \\"
-    echo "       OWNERS NODES MULTI_PILOT_BIN"
+    echo "       OWNERS NODES MULTI_PILOT_BIN ALLOCATION"
     echo "where OWNERS is a comma-separated list"
 }
 
@@ -59,6 +59,11 @@ MULTI_PILOT_BIN=$9
 if [[ -z $MULTI_PILOT_BIN ]]; then
     usage
     exit 1
+fi
+
+ALLOCATION=${10}
+if [[ -z $ALLOCATION ]]; then
+    echo "Will try to use the default allocation."
 fi
 
 BIRTH=`date +%s`
@@ -273,6 +278,10 @@ MINUTES=$(((${REMAINING_LIFETIME} + ${CLEAN_UP_TIME})/60))
 # On Stampede 2, TACC allocates only whole nodes, so -N = ${NODES}.  Since
 # this is not an MPI job, we want one task per node, and -n = ${NODES}.
 
+if [[ -n $ALLOCATION ]]; then
+    SBATCH_ALLOCATION_LINE="#SBATCH -A ${ALLOCATION}"
+fi
+
 echo '#!/bin/bash' > ${PILOT_DIR}/stampede2.slurm
 echo "
 #SBATCH -J ${JOB_NAME}
@@ -282,6 +291,7 @@ echo "
 #SBATCH -N ${NODES}
 #SBATCH -n ${NODES}
 #SBATCH -t ${MINUTES}
+${SBATCH_ALLOCATION_LINE}
 
 ${MULTI_PILOT_BIN} ${PILOT_BIN} ${PILOT_DIR}
 " >> ${PILOT_DIR}/stampede2.slurm
