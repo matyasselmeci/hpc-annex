@@ -120,6 +120,13 @@ trap cleanup EXIT
 
 cd ${PILOT_DIR}
 
+# The pilot scripts need to live in the ${PILOT_DIR} because the front-end
+# copied them into a temporary directory that it's responsible for cleaning up.
+cp ${PILOT_BIN} ${PILOT_DIR}
+cp ${MULTI_PILOT_BIN} ${PILOT_DIR}
+PILOT_BIN=${PILOT_DIR}/`basename ${PILOT_BIN}`
+MULTI_PILOT_BIN=${PILOT_DIR}/`basename ${MULTI_PILOT_BIN}`
+
 echo "Downloading configuration..."
 CONFIGURATION_FILE=`basename ${WELL_KNOWN_LOCATION_FOR_CONFIGURATION}`
 CURL_LOGGING=`curl -fsSL ${WELL_KNOWN_LOCATION_FOR_CONFIGURATION} -o ${CONFIGURATION_FILE} 2>&1`
