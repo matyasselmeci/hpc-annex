@@ -3,6 +3,8 @@
 ## From the user.
 TARGET="stampede2"
 JOB_NAME="hpc-annex"
+# It's OK for this to be empty (for now); it'll use your default allocation.
+ALLOCATION=
 
 ## Defaults.
 QUEUE_NAME="development"
@@ -47,11 +49,11 @@ function cleanup() {
 
 	if [[ -n $SCRIPT_DIR ]]; then
 		echo "Cleaning up remote temporary directory..."
-#		ssh \
-#			${CONNECTION_SHARING} \
-#			${SSH_TARGET} \
-#			${SSH_INDIRECT_COMMAND} \
-#			rm -fr ${SCRIPT_DIR}
+		ssh \
+			${CONNECTION_SHARING} \
+			${SSH_TARGET} \
+			${SSH_INDIRECT_COMMAND} \
+			rm -fr ${SCRIPT_DIR}
 	fi
 }
 trap cleanup EXIT
@@ -100,9 +102,6 @@ echo "... scripts copied to ${SCRIPT_DIR} on ${TARGET}."
 
 ## FIXME all of the LOGGING should probably be () 2>&1, but this whole
 ## script will probably become Python sooner rather than later...
-##
-## Until then, note that it would be nice to just run the pilot script,
-## since it prints out its own progress...
 
 ## Invoke the pilot script.
 echo "Submitting SLURM job on ${TARGET}..."
@@ -113,5 +112,5 @@ ssh \
 	${SCRIPT_DIR}/${TARGET}.sh \
 		${JOB_NAME} ${QUEUE_NAME} ${COLLECTOR} ${SCRIPT_DIR}/${TOKEN_FILE} ${LIFETIME} \
 		${SCRIPT_DIR}/${TARGET}.pilot ${OWNERS} ${NODES} \
-		${SCRIPT_DIR}/${TARGET}.multi-pilot
+		${SCRIPT_DIR}/${TARGET}.multi-pilot ${ALLOCATION}
 exit $?
