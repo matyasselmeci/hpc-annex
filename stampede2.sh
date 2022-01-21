@@ -1,5 +1,8 @@
 #!/bin/bash
 
+CONTROL_PREFIX="=-.-="
+echo "${CONTROL_PREFIX} PID $$"
+
 function usage() {
     echo "Usage: ${0} \\"
     echo "       JOB_NAME QUEUE_NAME COLLECTOR TOKEN_FILE LIFETIME PILOT_BIN \\"
@@ -106,6 +109,7 @@ if [[ $? != 0 ]]; then
     echo ${PILOT_DIR}
     exit 1
 fi
+echo "${CONTROL_PREFIX} PILOT_DIR ${PILOT_DIR}"
 
 function cleanup() {
     echo "Cleaning up temporary directory..."
@@ -307,15 +311,20 @@ ${MULTI_PILOT_BIN} ${PILOT_BIN} ${PILOT_DIR}
 # Submit the SLURM job.
 #
 echo "Submitting SLURM job..."
-SBATCH_LOGGING=`sbatch ${PILOT_DIR}/stampede2.slurm 2>&1`
-if [[ $? != 0 ]]; then
-    echo "Failed to submit job to SLURM ($?), aborting."
-    echo ${SBATCH_LOGGING}
+SBATCH_LOG=${PILOT_DIR}/sbatch.log
+sbatch ${PILOT_DIR}/stampede2.slurm &> ${SBATCH_LOG}
+SBATCH_ERROR=$?
+if [[ $SBATCH_ERROR != 0 ]]; then
+    echo "Failed to submit job to SLURM (${SBATCH_ERROR}), aborting."
+    cat ${SBATCH_LOG}
     exit 6
 fi
+JOBID=`cat ${SBATCH_LOG} | awk '/^Submitted batch job/{print $4}'`
+echo "${CONTROL_PREFIX} JOBID ${JOBID}"
 echo "..done."
 
 # Reset the EXIT trap so that we don't delete the temporary directory
-# that the SLURM job needs.
+# that the SLURM job needs.  (We pass it the temporary directory so that
+# it can clean up after itself.)
 trap EXIT
 exit 0
