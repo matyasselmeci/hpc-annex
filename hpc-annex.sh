@@ -65,6 +65,7 @@ trap cleanup EXIT
 ## SSH ignores -f if the connection is re-used,
 ## so depend on ControlPersist for now.
 echo "Making intial SSH connection..."
+## FIXME: it's at least technically possible for this to fail.
 ssh \
 	-f \
 	${CONNECTION_SHARING} \
