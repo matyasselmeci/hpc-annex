@@ -12,6 +12,7 @@ COLLECTOR="azaphrael.org"
 LIFETIME=7200
 OWNERS=`whoami`
 NODES=1
+# FIXME: need a way to set the XSEDE username.
 SSH_TARGET="login.xsede.org"
 SSH_INDIRECT_COMMAND="gsissh ${TARGET}"
 
@@ -42,11 +43,6 @@ fi
 CONNECTION_SHARING='-o ControlPersist="5m" -o ControlMaster="auto" -o ControlPath="'${CONTROL_PATH}'/master-%C"'
 
 function cleanup() {
-	if [[ -z $PRESERVE_CONTROL_PATH ]]; then
-		echo "Cleaning up local temporary directory..."
-		rm -fr ${CONTROL_PATH}
-	fi
-
 	if [[ -n $SCRIPT_DIR ]]; then
 		echo "Cleaning up remote temporary directory..."
 		ssh \
@@ -54,6 +50,11 @@ function cleanup() {
 			${SSH_TARGET} \
 			${SSH_INDIRECT_COMMAND} \
 			rm -fr ${SCRIPT_DIR}
+	fi
+
+	if [[ -z $PRESERVE_CONTROL_PATH ]]; then
+		echo "Cleaning up local temporary directory..."
+		rm -fr ${CONTROL_PATH}
 	fi
 }
 trap cleanup EXIT
@@ -84,7 +85,7 @@ if [[ $? != 0 ]]; then
 	exit 2
 fi
 
-echo "Copying back-end scripts to ${SCRIPT_DIR} on ${TARGET}..."
+echo "Populating remote temporary directory ${SCRIPT_DIR} ..."
 FILES="${TARGET}.sh ${TARGET}.pilot ${TARGET}.multi-pilot ${TOKEN_FILE}"
 COPY_LOGGING=`tar -c -f- ${FILES} | \
 	ssh \
@@ -97,7 +98,7 @@ if [[ $? != 0 ]]; then
 	echo ${COPY_LOGGING}
 	exit 3
 fi
-echo "... scripts copied to ${SCRIPT_DIR} on ${TARGET}."
+echo "... remote temporary directory populated."
 
 
 ## FIXME all of the LOGGING should probably be () 2>&1, but this whole
