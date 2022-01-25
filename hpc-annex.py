@@ -212,7 +212,7 @@ def invoke_pilot_script(
 			except BlockingIOError:
 				pass
 
-		if rc == None:
+		if rc != None:
 			break
 
 	# Print the remainder, if any.
@@ -220,7 +220,9 @@ def invoke_pilot_script(
 		print("   ", out_buffer.decode('utf-8'))
 	print()
 
-	return rc
+	# Set by proc.poll().
+	return proc.returncode
+
 
 if __name__ == "__main__":
 	# FIXME: The primary command-line argument.
@@ -298,9 +300,16 @@ if __name__ == "__main__":
 	# FIXME: submit local universe job
 
 	print(f"Submitting SLURM job on {target}:\n")
-	invoke_pilot_script(
+	rc = invoke_pilot_script(
 		ssh_connection_sharing, ssh_target, ssh_indirect_command,
 		script_dir, target, job_name, queue_name, collector, token_file,
 		lifetime, owners, nodes, allocation
 	)
-	print(f"... remote SLURM job submitted.")
+
+	if rc == 0:
+		print(f"... remote SLURM job submitted.")
+	else:
+		print(f"FAILED TO START ANNEX", file=sys.stderr)
+		print(f"return code {rc}", file=sys.stderr)
+
+	sys.exit(rc)
