@@ -11,6 +11,12 @@ import tempfile
 import subprocess
 
 
+INITIAL_CONNECTION_TIMEOUT = 180
+REMOTE_CLEANUP_TIMEOUT = 60
+REMOTE_MKDIR_TIMEOUT = 5
+REMOTE_POPULATE_TIMEOUT = 60
+
+
 def make_initial_ssh_connection(
 	ssh_connection_sharing, ssh_target, ssh_indirect_command,
 ):
@@ -22,9 +28,12 @@ def make_initial_ssh_connection(
 			'exit', '0',
 		],
 	)
-	# FIXME: supply the timeout
-	return proc.wait(timeout=None)
 
+	try:
+		return proc.wait(timeout=INITIAL_CONNECTION_TIMEOUT)
+	except subprocess.TimeoutExpired:
+		print(f"Did not make initial connection after {INITIAL_CONNECTION_TIMEOUT} seconds, aborting.")
+		sys.exit(1)
 
 def remove_remote_temporary_directory(
 	ssh_connection_sharing, ssh_target, ssh_indirect_command,
@@ -40,8 +49,11 @@ def remove_remote_temporary_directory(
 				'rm', '-fr', script_dir,
 			],
 		)
-		# FIXME: supply the timeout
-		proc.wait(timeout=None)
+
+	try:
+		return proc.wait(timeout=REMOTE_CLEANUP_TIMEOUT)
+	except subprocess.TimeoutExpired:
+		print(f"Did not clean up remote temporary directory after {INITIAL_CONNECTION_TIMEOUT} seconds, '{script_dir}' may need to be deleted manually.")
 
 
 def make_remote_temporary_directory(
@@ -60,18 +72,19 @@ def make_remote_temporary_directory(
 	)
 
 	try:
-		# FIXME: supply the timeout
-		out, err = proc.communicate(timeout=None)
+		out, err = proc.communicate(timeout=REMOTE_MKDIR_TIMEOUT)
 
 		if proc.returncode == 0:
 			return out.strip()
+		else:
+			print("Failed to make remote temporary directory, aborting.")
+			print(out)
 
-	except TimeoutExpired:
+	except subprocess.TimeoutExpired:
+		print(f"Failed to make remote temporary directory after {REMOTE_MKDIR_TIMEOUT} seconds, aborting.")
 		proc.kill()
 		out, err = proc.communicate()
 
-	print("Failed to make remote temporary directory, aborting.")
-	print(out)
 	sys.exit(2)
 
 
@@ -90,18 +103,20 @@ def populate_remote_temporary_directory(
 	)
 
 	try:
-		# FIXME: supply the timeout
-		out, err = proc.communicate(timeout=None)
+		out, err = proc.communicate(timeout=REMOTE_POPULATE_TIMEOUT)
+
 		if proc.returncode == 0:
 			return 0
+		else:
+			print("Failed to populate remote temporary directory, aborting.")
+			print(out)
 
-	except TimeoutExpired:
+	except subprocess.TimeoutExpired:
+		print(f"Failed to populate remote temporary directory in {REMOTE_POPULATE_TIMEOUT} seconds, aborting.")
 		proc.kill()
 		out, err = proc.communicate()
 
-	print("Failed to populate remote temporary directory, aborting.")
-	print(out)
-	sys.exit(2)
+	sys.exit(3)
 
 
 def extract_full_lines(buffer):
@@ -231,7 +246,7 @@ if __name__ == "__main__":
 			os.mkdir(control_path)
 		else:
 			print("~/.hpc-annex must be a directory, aborting.")
-			sys.exit(3)
+			sys.exit(4)
 
 	# Derived constants.
 	ssh_connection_sharing = [
@@ -254,7 +269,7 @@ if __name__ == "__main__":
 	)
 	if rc != 0:
 		print(f"Failed to make initial connection to {target}, aborting.")
-		sys.exit(1)
+		sys.exit(5)
 
 	##
 	## Register the clean-up function before creating the mess to clean-up.
@@ -282,9 +297,10 @@ if __name__ == "__main__":
 
 	# FIXME: submit local universe job
 
-	print(f"Submitting SLURM job on {target}...\n")
+	print(f"Submitting SLURM job on {target}:\n")
 	invoke_pilot_script(
 		ssh_connection_sharing, ssh_target, ssh_indirect_command,
 		script_dir, target, job_name, queue_name, collector, token_file,
 		lifetime, owners, nodes, allocation
 	)
+	print(f"... remote SLURM job submitted.")
