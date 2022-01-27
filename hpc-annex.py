@@ -10,6 +10,8 @@ import signal
 import tempfile
 import subprocess
 
+import htcondor
+
 
 INITIAL_CONNECTION_TIMEOUT = 180
 REMOTE_CLEANUP_TIMEOUT = 60
@@ -128,19 +130,20 @@ def extract_full_lines(buffer):
 	return buffer[last_newline + 1:], lines
 
 
-def process_line(line):
+def process_line(line, update_function):
 	control = '=-.-= '
 	if line.startswith(control):
 		command = line[len(control):]
 		attribute, value = command.split(' ')
 
-		# FIXME Update the job ad with these values.  Also, record
+		# TODO: Update the job ad with these values.  Also, record
 		# somewhere -- I guess in a global? -- which of these pairs
 		# we actually say.  The caller should clean up the job ad
 		# if we didn't see one of them.  Actually, the caller
 		# should pass in a lambda to call here, so we can just
 		# update the values in there (and thus the caller) naturally.
-		print(f"Found control {attribute} value {value}")
+		# print(f"Found control {attribute} value {value}")
+		update_function(attribute, value)
 
 	else:
 		print("   ", line)
@@ -149,7 +152,7 @@ def process_line(line):
 def invoke_pilot_script(
 	ssh_connection_sharing, ssh_target, ssh_indirect_command,
 	script_dir, target, job_name, queue_name, collector, token_file,
-	lifetime, owners, nodes, allocation
+	lifetime, owners, nodes, allocation, update_function
 ):
 	args = [
 		'ssh',
@@ -206,7 +209,7 @@ def invoke_pilot_script(
 
 				out_buffer, lines = extract_full_lines(out_buffer)
 				for line in lines:
-					process_line(line)
+					process_line(line, update_function)
 
 			# Python throws a BlockingIOError if an asynch FD is unready.
 			except BlockingIOError:
@@ -222,6 +225,12 @@ def invoke_pilot_script(
 
 	# Set by proc.poll().
 	return proc.returncode
+
+
+def updateJobAd(clusterID, attribute, value):
+	# print(f"updateJobAd({clusterID}, {attribute}, {value})")
+	schedd = htcondor.Schedd();
+	schedd.edit(clusterID, f"hpc_annex_{attribute}", f'"{value}"')
 
 
 if __name__ == "__main__":
@@ -270,7 +279,7 @@ if __name__ == "__main__":
 		ssh_connection_sharing, ssh_target, ssh_indirect_command,
 	)
 	if rc != 0:
-		print(f"Failed to make initial connection to {target}, aborting.")
+		print(f"Failed to make initial connection to {target}, aborting ({rc}).")
 		sys.exit(5)
 
 	##
@@ -297,13 +306,61 @@ if __name__ == "__main__":
 	)
 	print("... remote directory populated.")
 
-	# FIXME: submit local universe job
+	# Submit local universe job.
+	print("Submitting state-tracking job...")
+	schedd = htcondor.Schedd()
+	submit_description = htcondor.Submit({
+		"universe":               "local",
+		"requirements":           "false",
+		"executable":             "dummy",
+		# Properties of the annex request.  We should think about
+		# representing these as a nested ClassAd.  Ideally, the back-end
+		# would, instead of being passed a billion command-line arguments,
+		# just pull this ad from the collector (after this local universe
+		# job has forwarded it there).
+		"+hpc_annex_job_name":    f'"{job_name}"',
+		"+hpc_annex_queue_name":  f'"{queue_name}"',
+		"+hpc_annex_collector":   f'"{collector}"',
+		"+hpc_annex_lifetime":    f'"{lifetime}"',
+		"+hpc_annex_owners":      f'"{owners}"',
+		"+hpc_annex_nodes":       f'"{nodes}"',
+		"+hpc_annex_allocation":  f'"{allocation}"',
+		# Hard state required for clean up.  We'll be adding
+		# hpc_annex_pid, hpc_annex_pilot_dir, and hpc_annex_jobID
+		# as they're reported by the back-end script.
+		"+hpc_annex_script_dir":  f'"{script_dir}"',
+	});
+	submit_result = schedd.submit(submit_description)
+
+    # FIXME: what's the actual protocol for error-checking here?
+    # Do we just need to catch every exception from the previous line?
+	if submit_result:
+		cluster_id = submit_result.cluster()
+		print(f"... done, with cluster ID {cluster_id}.")
+	else:
+	    print(f"Failed to submit state-tracking job, aborting.")
+	    sys.exit(6)
+
+
+	# FIXME: for our current purposes, the local universe job never
+	# needs to run -- it just stores state.  We know the lifetime for
+	# the annex, so we should be able to add a periodic_remove expression
+	# that just causes the job to remove itself (well?) after we know
+	# the annex will have either succeeded or failed.
+	#
+	# In the scenario where the local universe job actually runs,
+	# and communicates with the collector, we can have it stop forwarding
+	# state information to the collector when it sees that the corresponding
+	# annex has been advertised, since at that point, the annex can
+	# maintain its own state.  OTOH, it might be simpler to keep the
+	# annex state always in the queue...
 
 	print(f"Submitting SLURM job on {target}:\n")
 	rc = invoke_pilot_script(
 		ssh_connection_sharing, ssh_target, ssh_indirect_command,
 		script_dir, target, job_name, queue_name, collector, token_file,
-		lifetime, owners, nodes, allocation
+		lifetime, owners, nodes, allocation,
+		lambda attribute, value: updateJobAd(cluster_id, attribute, value)
 	)
 
 	if rc == 0:
