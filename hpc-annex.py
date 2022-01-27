@@ -324,7 +324,7 @@ if __name__ == "__main__":
 		"+hpc_annex_lifetime":    f'"{lifetime}"',
 		"+hpc_annex_owners":      f'"{owners}"',
 		"+hpc_annex_nodes":       f'"{nodes}"',
-		"+hpc_annex_allocation":  f'"{allocation}"',
+		"+hpc_annex_allocation":  f'"{allocation}"' if allocation is not None else "undefined",
 		# Hard state required for clean up.  We'll be adding
 		# hpc_annex_pid, hpc_annex_pilot_dir, and hpc_annex_jobID
 		# as they're reported by the back-end script.
