@@ -6,7 +6,7 @@ echo "${CONTROL_PREFIX} PID $$"
 function usage() {
     echo "Usage: ${0} \\"
     echo "       JOB_NAME QUEUE_NAME COLLECTOR TOKEN_FILE LIFETIME PILOT_BIN \\"
-    echo "       OWNERS NODES MULTI_PILOT_BIN ALLOCATION"
+    echo "       OWNERS NODES MULTI_PILOT_BIN ALLOCATION REQUEST_ID"
     echo "where OWNERS is a comma-separated list"
 }
 
@@ -65,8 +65,17 @@ if [[ -z $MULTI_PILOT_BIN ]]; then
 fi
 
 ALLOCATION=${10}
+if [[ $ALLOCATION == "None" ]]; then
+    ALLOCATION=""
+fi
 if [[ -z $ALLOCATION ]]; then
     echo "Will try to use the default allocation."
+fi
+
+REQUEST_ID=${11}
+if [[ -z $REQUEST_ID ]]; then
+    usage
+    exit 1
 fi
 
 BIRTH=`date +%s`
@@ -229,8 +238,9 @@ START = \$(START) && stringListMember( Owner, \"${OWNERS}\" )
 # Advertise the standard annex attributes (master ad for condor_off).
 IsAnnex = TRUE
 AnnexName = \"${JOB_NAME}\"
-STARTD_ATTRS = \$(STARTD_ATTRS) AnnexName IsAnnex
-MASTER_ATTRS = \$(MASTER_ATTRS) AnnexName IsAnnex
+hpc_annex_request_id = \"${REQUEST_ID}\"
+STARTD_ATTRS = \$(STARTD_ATTRS) AnnexName IsAnnex hpc_annex_request_id
+MASTER_ATTRS = \$(MASTER_ATTRS) AnnexName IsAnnex hpc_annex_request_id
 
 #
 # Subsequent configuration is machine-specific.

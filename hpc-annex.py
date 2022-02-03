@@ -143,8 +143,8 @@ def process_line(line, update_function):
 
 def invoke_pilot_script(
 	ssh_connection_sharing, ssh_target, ssh_indirect_command,
-	script_dir, target, job_name, queue_name, collector, token_file,
-	lifetime, owners, nodes, allocation, update_function
+	script_dir, target, annex_name, queue_name, collector, token_file,
+	lifetime, owners, nodes, allocation, update_function, cluster_id
 ):
 	args = [
 		'ssh',
@@ -152,12 +152,12 @@ def invoke_pilot_script(
 		ssh_target,
 		* ssh_indirect_command,
 		f'{script_dir}/{target}.sh',
-		job_name, queue_name, collector, f"{script_dir}/{token_file}",
+		annex_name, queue_name, collector, f"{script_dir}/{token_file}",
 		str(lifetime), f"{script_dir}/{target}.pilot", owners, str(nodes),
-		f"{script_dir}/{target}.multi-pilot"
+		f"{script_dir}/{target}.multi-pilot",
+		f"{allocation}",
+		f"{cluster_id}",
 	]
-	if allocation is not None:
-		args.append(allocation)
 	proc = subprocess.Popen(
 		args,
 		stdout=subprocess.PIPE,
@@ -219,9 +219,9 @@ def invoke_pilot_script(
 	return proc.returncode
 
 
-def updateJobAd(clusterID, attribute, value):
+def updateJobAd(cluster_id, attribute, value):
 	schedd = htcondor.Schedd();
-	schedd.edit(clusterID, f"hpc_annex_{attribute}", f'"{value}"')
+	schedd.edit(cluster_id, f"hpc_annex_{attribute}", f'"{value}"')
 
 
 if __name__ == "__main__":
@@ -233,7 +233,8 @@ if __name__ == "__main__":
 	lifetime = 7200
 
 	# FIXME: command-line options (may override defaults).
-	job_name = "hpc-annex"
+	# FIXME: Verify that annex_name is a valid SLURM job name.
+	annex_name = "hpc-annex"
 	queue_name = "development"
 	owners = "tlmiller"
 	allocation = None
@@ -300,15 +301,47 @@ if __name__ == "__main__":
 	# Submit local universe job.
 	print("Submitting state-tracking job...")
 	schedd = htcondor.Schedd()
+	# FIXME: this is obviously wrong.
+	local_job_executable = "local.py"
+	#
+	# The magic in this job description is thus:
+	#   * hpc_annex_start_time is undefined until the job runs and finds
+	#     a machine ad with a matching hpc_annex_request_id.
+	#   * The job will go idle (because it can't start) at that poing,
+	#     based on its Requirements.
+	#   * Before then, the job's on_exit_remove must be false -- not
+	#     undefined -- to make sure it keeps polling.
+	#   * The job runs every five minutes because of cron_minute.
+	#
 	submit_description = htcondor.Submit({
 		"universe":               "local",
-		"requirements":           "false",
+		# hpc_annex_start time is set by the job script when it finds
+		# a machine with a matching request ID.  At that point, we can
+		# stop runnig this script, but we don't remove it to simplify
+		# the UI/UX code; instead, we wait until an hour past the end
+		# of the request's lifetime to trigger a peridic remove.
+		"requirements":           "hpc_annex_start_time =?= undefined",
+		"executable":             local_job_executable,
+
+        # Sadly, even if you set on_exit_remove to ! requirements,
+        # the job lingers in X state for a good long time.
+		"cron_minute":            "*/5",
+		"on_exit_remove":         "PeriodicRemove =?= true",
+		"periodic_remove":        f'hpc_annex_start_time + {lifetime} + 3600 < time()',
+
+        # Consider adding a log, an output, and an error file to assist
+        # in debugging later.  Problem: where should it go?  How does it
+        # cleaned up?
+
+		"environment":            f'PYTHONPATH={os.environ["PYTHONPATH"]}',
+		"arguments":              f"$(CLUSTER).0 hpc_annex_request_id $(CLUSTER) {collector}",
+		"+hpc_annex_request_id":  '"$(CLUSTER)"',
 		# Properties of the annex request.  We should think about
 		# representing these as a nested ClassAd.  Ideally, the back-end
 		# would, instead of being passed a billion command-line arguments,
 		# just pull this ad from the collector (after this local universe
 		# job has forwarded it there).
-		"+hpc_annex_job_name":    f'"{job_name}"',
+		"+hpc_annex_name":        f'"{annex_name}"',
 		"+hpc_annex_queue_name":  f'"{queue_name}"',
 		"+hpc_annex_collector":   f'"{collector}"',
 		"+hpc_annex_lifetime":    f'"{lifetime}"',
@@ -334,9 +367,10 @@ if __name__ == "__main__":
 	print(f"Submitting SLURM job on {target}:\n")
 	rc = invoke_pilot_script(
 		ssh_connection_sharing, ssh_target, ssh_indirect_command,
-		script_dir, target, job_name, queue_name, collector, token_file,
+		script_dir, target, annex_name, queue_name, collector, token_file,
 		lifetime, owners, nodes, allocation,
 		lambda attribute, value: updateJobAd(cluster_id, attribute, value),
+		cluster_id,
 	)
 
 	if rc == 0:
