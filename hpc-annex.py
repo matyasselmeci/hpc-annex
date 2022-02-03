@@ -8,6 +8,7 @@ import fcntl
 import atexit
 import signal
 import tempfile
+import traceback
 import subprocess
 
 import htcondor
@@ -135,16 +136,7 @@ def process_line(line, update_function):
 	if line.startswith(control):
 		command = line[len(control):]
 		attribute, value = command.split(' ')
-
-		# TODO: Update the job ad with these values.  Also, record
-		# somewhere -- I guess in a global? -- which of these pairs
-		# we actually say.  The caller should clean up the job ad
-		# if we didn't see one of them.  Actually, the caller
-		# should pass in a lambda to call here, so we can just
-		# update the values in there (and thus the caller) naturally.
-		# print(f"Found control {attribute} value {value}")
 		update_function(attribute, value)
-
 	else:
 		print("   ", line)
 
@@ -228,7 +220,6 @@ def invoke_pilot_script(
 
 
 def updateJobAd(clusterID, attribute, value):
-	# print(f"updateJobAd({clusterID}, {attribute}, {value})")
 	schedd = htcondor.Schedd();
 	schedd.edit(clusterID, f"hpc_annex_{attribute}", f'"{value}"')
 
@@ -312,7 +303,6 @@ if __name__ == "__main__":
 	submit_description = htcondor.Submit({
 		"universe":               "local",
 		"requirements":           "false",
-		"executable":             "dummy",
 		# Properties of the annex request.  We should think about
 		# representing these as a nested ClassAd.  Ideally, the back-end
 		# would, instead of being passed a billion command-line arguments,
@@ -326,41 +316,27 @@ if __name__ == "__main__":
 		"+hpc_annex_nodes":       f'"{nodes}"',
 		"+hpc_annex_allocation":  f'"{allocation}"' if allocation is not None else "undefined",
 		# Hard state required for clean up.  We'll be adding
-		# hpc_annex_pid, hpc_annex_pilot_dir, and hpc_annex_jobID
+		# hpc_annex_PID, hpc_annex_PILOT_DIR, and hpc_annex_JOB_ID
 		# as they're reported by the back-end script.
 		"+hpc_annex_script_dir":  f'"{script_dir}"',
 	});
-	submit_result = schedd.submit(submit_description)
 
-    # FIXME: what's the actual protocol for error-checking here?
-    # Do we just need to catch every exception from the previous line?
-	if submit_result:
-		cluster_id = submit_result.cluster()
-		print(f"... done, with cluster ID {cluster_id}.")
-	else:
-	    print(f"Failed to submit state-tracking job, aborting.")
-	    sys.exit(6)
+	try:
+		submit_result = schedd.submit(submit_description)
+	except:
+		traceback.print_exc()
+		print(f"Failed to submit state-tracking job, aborting.")
+		sys.exit(6)
 
-
-	# FIXME: for our current purposes, the local universe job never
-	# needs to run -- it just stores state.  We know the lifetime for
-	# the annex, so we should be able to add a periodic_remove expression
-	# that just causes the job to remove itself (well?) after we know
-	# the annex will have either succeeded or failed.
-	#
-	# In the scenario where the local universe job actually runs,
-	# and communicates with the collector, we can have it stop forwarding
-	# state information to the collector when it sees that the corresponding
-	# annex has been advertised, since at that point, the annex can
-	# maintain its own state.  OTOH, it might be simpler to keep the
-	# annex state always in the queue...
+	cluster_id = submit_result.cluster()
+	print(f"... done, with cluster ID {cluster_id}.")
 
 	print(f"Submitting SLURM job on {target}:\n")
 	rc = invoke_pilot_script(
 		ssh_connection_sharing, ssh_target, ssh_indirect_command,
 		script_dir, target, job_name, queue_name, collector, token_file,
 		lifetime, owners, nodes, allocation,
-		lambda attribute, value: updateJobAd(cluster_id, attribute, value)
+		lambda attribute, value: updateJobAd(cluster_id, attribute, value),
 	)
 
 	if rc == 0:

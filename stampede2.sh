@@ -319,8 +319,8 @@ if [[ $SBATCH_ERROR != 0 ]]; then
     cat ${SBATCH_LOG}
     exit 6
 fi
-JOBID=`cat ${SBATCH_LOG} | awk '/^Submitted batch job/{print $4}'`
-echo "${CONTROL_PREFIX} JOBID ${JOBID}"
+JOB_ID=`cat ${SBATCH_LOG} | awk '/^Submitted batch job/{print $4}'`
+echo "${CONTROL_PREFIX} JOB_ID ${JOB_ID}"
 echo "..done."
 
 # Reset the EXIT trap so that we don't delete the temporary directory
