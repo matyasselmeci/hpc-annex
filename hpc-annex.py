@@ -53,11 +53,12 @@ def remove_remote_temporary_directory(
 			],
 		)
 
-	try:
-		return proc.wait(timeout=REMOTE_CLEANUP_TIMEOUT)
-	except subprocess.TimeoutExpired:
-		print(f"Did not clean up remote temporary directory after {INITIAL_CONNECTION_TIMEOUT} seconds, '{script_dir}' may need to be deleted manually.")
+		try:
+			return proc.wait(timeout=REMOTE_CLEANUP_TIMEOUT)
+		except subprocess.TimeoutExpired:
+			print(f"Did not clean up remote temporary directory after {INITIAL_CONNECTION_TIMEOUT} seconds, '{script_dir}' may need to be deleted manually.")
 
+	return 0
 
 def make_remote_temporary_directory(
 	ssh_connection_sharing, ssh_target, ssh_indirect_command,
@@ -85,8 +86,11 @@ def make_remote_temporary_directory(
 
 	except subprocess.TimeoutExpired:
 		print(f"Failed to make remote temporary directory after {REMOTE_MKDIR_TIMEOUT} seconds, aborting.")
+		print(f"Cleaning up...")
 		proc.kill()
+		print(f"...");
 		out, err = proc.communicate()
+		print(f"... clean up complete.")
 
 	sys.exit(2)
 
