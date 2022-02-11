@@ -186,6 +186,14 @@ if [[ $? != 0 ]]; then
     exit 4
 fi
 
+#
+# Create the script we need for Singularity.
+#
+echo '#!/bin/bash -l
+module load tacc-singularity
+exec singularity "$@"' > ${PILOT_DIR}/singularity.sh
+chmod 755 ${PILOT_DIR}/singularity.sh
+
 # It may have take some time to get everything installed, so to make sure
 # we get our full clean-up time, subtract off how long we've been running
 # already.
@@ -246,9 +254,9 @@ MASTER_ATTRS = \$(MASTER_ATTRS) AnnexName IsAnnex hpc_annex_request_id
 # Subsequent configuration is machine-specific.
 #
 
-# This is made available via 'module load tacc-singularity', so it's
-# not (necessarily) in /usr/bin.
-SINGULARITY=singularity
+# This is made available via 'module load tacc-singularity', but the
+# starter ignores PATH, so wrap it up.
+SINGULARITY=${PILOT_DIR}/singularity.sh
 
 # Stampede 2 has Knight's Landing queues (4 threads per core) and Skylake
 # queues (2 threads per core).  The "KNL" nodes have 68 cores and 96 GB
