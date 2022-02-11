@@ -91,7 +91,7 @@ echo "Starting script at `date`..."
 
 # The binaries must be a tarball named condor-*, and unpacking that tarball
 # must create a directory which also matches condor-*.
-WELL_KNOWN_LOCATION_FOR_BINARIES=https://research.cs.wisc.edu/htcondor/tarball/current/9.3.2/update/condor-9.3.2-20211130-x86_64_CentOS7-stripped.tar.gz
+WELL_KNOWN_LOCATION_FOR_BINARIES=https://research.cs.wisc.edu/htcondor/tarball/current/9.5.4/update/condor-9.5.4-20220207-x86_64_CentOS7-stripped.tar.gz
 
 # The configuration must be a tarball which does NOT match condor-*.  It
 # will be unpacked in the root of the directory created by unpacking the
@@ -245,6 +245,10 @@ MASTER_ATTRS = \$(MASTER_ATTRS) AnnexName IsAnnex hpc_annex_request_id
 #
 # Subsequent configuration is machine-specific.
 #
+
+# This is made available via 'module load tacc-singularity', so it's
+# not (necessarily) in /usr/bin.
+SINGULARITY=singularity
 
 # Stampede 2 has Knight's Landing queues (4 threads per core) and Skylake
 # queues (2 threads per core).  The "KNL" nodes have 68 cores and 96 GB

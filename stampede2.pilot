@@ -2,6 +2,18 @@
 
 PILOT_DIR=$1
 
+#
+# FIXME:
+# This works to detect the presence of Singularity -- if
+# `SINGULARITY=singularity` is in the config -- but that config fails the
+# is-Singularity-working test, which probably doesn't look at PATH.  Instead,
+# have stampede2.sh write a little shell script that does the module
+# load and exec's singularity $@, and have point the config at that script.
+#
+if [[ -n $TACC_SYSTEM ]]; then
+    module load tacc-singularity
+fi
+
 cd ${PILOT_DIR}
 cd condor-*
 
