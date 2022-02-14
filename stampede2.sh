@@ -206,7 +206,11 @@ fi
 # on the error appearing rather than the following sequence, in which
 # case we could ..?
 #
-# FIXME: is it TEMP/TMP not being set?
+# Yeah, screw all this for now.  We'll try to make TACC fix this broken
+# script, instead.  I tested both the original line and the following one
+# in the singularity.sh script, and the following line didn't have the error:
+#
+# model=$(awk -F : "/model/ { print \$2; exit }" /proc/cpuinfo | sed -e "s/ \*//g")
 #
 echo '#!/bin/bash
 export USER=`/usr/bin/id -un`
