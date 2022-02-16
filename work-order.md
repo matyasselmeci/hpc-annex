@@ -1,3 +1,6 @@
+UX/UI Work
+----------
+
 `htcondor job submit ...`
 
 Implement `--annex-name <annex-name>`, which limits the submitted job to
@@ -74,3 +77,13 @@ the startd.
 We can consider adding a command which reconnects to the HPC machine
 in question and `scancel`s the job later (it would require the user
 to reauthenticate).
+
+Other Machines
+--------------
+
+The existing front- and back- end code should be broadly applicable to
+Bridges 2 and Expanse because they're both accessible via `gsissh` from
+`login.xsede.org`, XSEDE's SSO site.  It would be nice to share scripts
+between the three, as well, but it's by no means required, and if doing
+so would slow down adding either of the other two, then we should save
+the refactoring for later.
