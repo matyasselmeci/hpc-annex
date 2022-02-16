@@ -5,11 +5,19 @@ Feature Work
   (request).
 
   Given the first point, below, we can relatively easily determine the
-  full path to each and every `.sif` file that will be used by the jobs.
+  full path to each and every `.sif` file that will be used by the jobs
+  in the queue when the annex is created.
   We can than transfer (using scp over the shared connection) those
   `.sif` files to a directory that will be cleaned up (because the pilot
-  already does) on the shared filesystem.  For now, let's not worry about
-  letting jobs created by the step below run anywher else; it seems like
+  already does) on the shared filesystem.
+  
+  For software engineering purposes, the code to make this happen should
+  be sufficiently well-isolated that it could easily be called as part
+  of a future command that adds an existing set of jobs to an existing
+  annex (rather than submits them only there).
+  
+  For now, let's not worry about
+  letting jobs created by the step below run anywhere else; it seems like
   sharing `.sif` files is largely a special case of pre-staged data, or
   of granting the AP its own sandbox, and we should figure that out before
   trying to do anything very clever.  In that case, we can rewrite the
@@ -68,7 +76,10 @@ that in the future.
   attributes.  These attributes will include the _annex-name_.  An
   annex with just a local-universe job is considering "pending."
   Otherwise, report on the size of the annex (reported cores) and
-  how many jobs it's currently running.
+  how many jobs it's currently running.  If one _annex-name_ has
+  multiple components, sum the components by type (in-collector
+  or pending) and display the summed output for each type
+  appropriately.
 
 - [ ] `htcondor job resources <job-ad>`
 
