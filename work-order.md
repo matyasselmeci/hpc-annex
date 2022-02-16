@@ -54,9 +54,11 @@ how many jobs it's currently running.
 
 &nbsp;
 
-[] TODO: What does `htcondor job resources <job-ID>` report right
-now?  (Does the command exist?)  Does it need special handling
-for annex jobs?
+`htcondor job resources <job-ad>`
+
+This command exists but isn't documented in the output of
+`htcondor jobs`.  If it doesn't work properly for annex
+jobs (I don't know why it wouldn't), it needs fixing.
 
 &nbsp;
 
