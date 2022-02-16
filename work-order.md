@@ -1,3 +1,22 @@
+Feature Work
+------------
+
+- [ ] Share `.sif` files between different machines in the same annex
+  (request).
+
+  Given the first point, below, we can relatively easily determine the
+  full path to each and every `.sif` file that will be used by the jobs.
+  We can than transfer (using scp over the shared connection) those
+  `.sif` files to a directory that will be cleaned up (because the pilot
+  already does) on the shared filesystem.  For now, let's not worry about
+  letting jobs created by the step below run anywher else; it seems like
+  sharing `.sif` files is largely a special case of pre-staged data, or
+  of granting the AP its own sandbox, and we should figure that out before
+  trying to do anything very clever.  In that case, we can rewrite the
+  jobs to request that the `.sif` file never be transferred (see the
+  container universe documentation) and set up a stard transform in the
+  pilot to prepend the full path to the shared `.sif` directory.
+
 UX/UI Work
 ----------
 
