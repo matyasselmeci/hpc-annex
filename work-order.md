@@ -44,12 +44,6 @@ UX/UI Work
   Also tag the job so that `htcondor annex create` has an easier / more
   reliable time finding the jobs it needs to scan for .sif files.
 
-TODO: Alter the CM's configuration to require that `AnnexName` is set
-in all of its ads.  This will let us write the requirement for the
-authenticated identity conditioned on the machine having an `AnnexName`,
-which will make it easier for the job to run elsewhere, should we allow
-that in the future.
-
 - [ ] `htcondor annex create ...`
 
   The back-end for this command is already implemented by `htpc-annex.py`,
