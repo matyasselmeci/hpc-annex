@@ -40,6 +40,9 @@ UX/UI Work
   `<user-name>@annex.osgdev.chtc.io`.  This should suffice to prevent the job
   from running anywhere else, but if we can something to exclude it from the
   default central manager's matchmaking, so much the better.
+  
+  Also tag the job so that `htcondor annex create` has an easier / more
+  reliable time finding the jobs it needs to scan for .sif files.
 
 TODO: Alter the CM's configuration to require that `AnnexName` is set
 in all of its ads.  This will let us write the requirement for the
