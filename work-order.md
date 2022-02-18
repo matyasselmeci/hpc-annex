@@ -24,6 +24,13 @@ Feature Work
   jobs to request that the `.sif` file never be transferred (see the
   container universe documentation) and set up a stard transform in the
   pilot to prepend the full path to the shared `.sif` directory.
+  
+  - [ ] It may not be hard to instead change HTCondor to evaluate
+    `transfer_container` in the shadow in the context of the machine ad,
+    which would allow us to not transfer the .sif file if we're running
+    on an annex of the right name (or that advertises having a pre-staged
+    .sif file).  This would let a startd transform on the EP fix up the
+    .sif file's location.
 
 UX/UI Work
 ----------
@@ -38,7 +45,7 @@ UX/UI Work
   the job's requirements to match the given _annex-name_ to the machine-ad
   attribute `AnnexName`, as well as `AuthenticatedIdentity` to
   `<user-name>@annex.osgdev.chtc.io`.  This should suffice to prevent the job
-  from running anywhere else, but if we can something to exclude it from the
+  from running anywhere else, but if we can add something to exclude it from the
   default central manager's matchmaking, so much the better.
   
   Also tag the job so that `htcondor annex create` has an easier / more
