@@ -51,7 +51,7 @@ UX/UI Work
   Also tag the job so that `htcondor annex create` has an easier / more
   reliable time finding the jobs it needs to scan for .sif files.
 
-- [ ] `htcondor annex create ...`
+- [ ] (Jason?) `htcondor annex create ...`
 
   The back-end for this command is already implemented by `htpc-annex.py`,
   although that script does not presently take any arguments.
@@ -72,7 +72,7 @@ UX/UI Work
   - `token_file` is also a configuration constant, but should
     probably understand `~`, e.g., be set to `~/.condor/pilot.token`.
 
-- [ ] `htcondor annex status <annex-name>`
+- [ ] (Jason?) `htcondor annex status <annex-name>`
 
   The status of _annex-name_ will be obtainable from either the annex
   collector (a configuration constant) or from one or more local
