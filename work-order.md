@@ -25,7 +25,7 @@ Feature Work
   container universe documentation) and set up a stard transform in the
   pilot to prepend the full path to the shared `.sif` directory.
   
-  - [ ] It may not be hard to instead change HTCondor to evaluate
+  - [ ] (GregT?) It may not be hard to instead change HTCondor to evaluate
     `transfer_container` in the shadow in the context of the machine ad,
     which would allow us to not transfer the .sif file if we're running
     on an annex of the right name (or that advertises having a pre-staged
@@ -103,6 +103,12 @@ UX/UI Work
   require additional back-end configuration, because right now HTCondor
   won't let us use the collector to pass an admin capability from
   the startd.
+  
+  - [ ] (ToddM) JaimeF is currently reviewing a PR that will 80% solve
+    this problem, but would required the annex creator to have ADMIN
+    level auth'n at the collector.  We think it could easily be extended
+    to allow an identity authenticated by a method in the ADMIN list which
+    matches the `AuthorizedIdentity` of the ad as well.
 
   We can consider adding a command which reconnects to the HPC machine
   in question and `scancel`s the job later (it would require the user
