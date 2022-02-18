@@ -78,11 +78,15 @@ UX/UI Work
   or pending) and display the summed output for each type
   appropriately.
 
-- [ ] `htcondor job resources <job-ad>`
+- [x] `htcondor job resources <job-ad>`
 
   This command exists but isn't documented in the output of
   `htcondor jobs`.  If it doesn't work properly for annex
   jobs (I don't know why it wouldn't), it needs fixing.
+  
+  This works fine.  It might be improved by mentioning the
+  annex name explicitly; Miron may think that the output
+  shouldn't include the slot name.
 
 - [ ] `htcondor annex shutdown <annex-name>`
 
