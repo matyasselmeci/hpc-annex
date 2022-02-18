@@ -223,6 +223,7 @@ def invoke_pilot_script(
 	return proc.returncode
 
 
+# FIXME: catch HTCondorIOError and retry.
 def updateJobAd(cluster_id, attribute, value):
 	schedd = htcondor.Schedd();
 	schedd.edit(cluster_id, f"hpc_annex_{attribute}", f'"{value}"')
@@ -243,9 +244,9 @@ if __name__ == "__main__":
 	owners = "tlmiller"
 	allocation = None
 
-	# Constants.  Not sure how these first two will get set in production.
-	collector = "azaphrael.org"
-	token_file = "pilot.token"
+	# Constants.  Note that token_file should expand ~.
+	collector = "htcondor-cm-hpcannex.osgdev.chtc.io"
+	token_file = "pilot-tokens/annex.osgdev.chtc.io"
 
 	control_path = os.path.expanduser("~/.hpc-annex")
 	if not os.path.isdir(control_path):
