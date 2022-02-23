@@ -74,7 +74,9 @@ UX/UI Work
   - `collector` is configuration constant.  Not sure how to do
     configuration for this script.
   - `token_file` is also a configuration constant, but should
-    probably understand `~`, e.g., be set to `~/.condor/pilot.token`.
+    probably understand `~`, and be set to `~/.condor/tokens.d/<user>@annex.osgdev.chtc.io`,
+    since that's the principal we'll be issuing tokens for
+    automagically at some point.
 
 - [ ] (Jason?) `htcondor annex status <annex-name>`
 
