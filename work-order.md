@@ -39,7 +39,7 @@ Feature Work
 UX/UI Work
 ----------
 
-- [ ] `htcondor job submit ...`
+- [x] `htcondor job submit ...`
 
   Implement `--annex-name <annex-name>`, which limits the submitted job to
   running on _annex-name_.
