@@ -6,7 +6,7 @@ echo "${CONTROL_PREFIX} PID $$"
 function usage() {
     echo "Usage: ${0} \\"
     echo "       JOB_NAME QUEUE_NAME COLLECTOR TOKEN_FILE LIFETIME PILOT_BIN \\"
-    echo "       OWNERS NODES MULTI_PILOT_BIN ALLOCATION REQUEST_ID"
+    echo "       OWNERS NODES MULTI_PILOT_BIN ALLOCATION REQUEST_ID PASSWORD_FILE"
     echo "where OWNERS is a comma-separated list"
 }
 
@@ -74,6 +74,12 @@ fi
 
 REQUEST_ID=${11}
 if [[ -z $REQUEST_ID ]]; then
+    usage
+    exit 1
+fi
+
+PASSWORD_FILE=${12}
+if [[ -z $PASSWORD_FILE ]]; then
     usage
     exit 1
 fi
@@ -244,6 +250,11 @@ SHARED_PORT_PORT = 0
 # Allows condor_off (et alia) to work from the head node.
 ALLOW_ADMINISTRATOR = \$(ALLOW_ADMINISTRATOR) $(whoami)@$(hostname)
 
+# FIXME: use same-AuthenticatedIdentity once that becomes available, instead.
+# Allows condor_off (et alia) to work from the submit node.
+ALLOW_ADMINISTRATOR = \$(ALLOW_ADMINISTRATOR) condor_pool@*
+SEC_DEFAULT_AUTHENTICATION_METHODS = FS IDTOKENS PASSWORD
+
 # Eliminate a bogus, repeated warning in the logs.  This is a bug;
 # it should be the default.
 SEC_PASSWORD_DIRECTORY = \$(LOCAL_DIR)/passwords.d
@@ -285,7 +296,7 @@ MASTER_ATTRS = \$(MASTER_ATTRS) AnnexName IsAnnex hpc_annex_request_id
 
 # This is made available via 'module load tacc-singularity', but the
 # starter ignores PATH, so wrap it up.
-SINGULARITY=${PILOT_DIR}/singularity.sh
+SINGULARITY = ${PILOT_DIR}/singularity.sh
 
 # Stampede 2 has Knight's Landing queues (4 threads per core) and Skylake
 # queues (2 threads per core).  The "KNL" nodes have 68 cores and 96 GB
@@ -308,6 +319,7 @@ MODIFY_REQUEST_EXPR_REQUESTMEMORY = max({ 3072, quantize(RequestMemory, {128}) }
 mkdir local/passwords.d
 mkdir local/tokens.d
 cp ${TOKEN_FILE} local/tokens.d
+cp ${PASSWORD_FILE} local/passwords.d/POOL
 
 #
 # Unpack the configuration on top.

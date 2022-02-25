@@ -7,6 +7,8 @@ import time
 import fcntl
 import atexit
 import signal
+import getpass
+import secrets
 import tempfile
 import traceback
 import subprocess
@@ -97,9 +99,13 @@ def make_remote_temporary_directory(
 
 def populate_remote_temporary_directory(
 	ssh_connection_sharing, ssh_target, ssh_indirect_command,
-	script_dir, token_file,
+	script_dir, token_file, password_file
 ):
-	files = f"{target}.sh {target}.pilot {target}.multi-pilot {token_file}"
+	(token_directory, token_basename) = os.path.split(token_file)
+	(password_directory, password_basename) = os.path.split(password_file)
+	files = f"{target}.sh {target}.pilot {target}.multi-pilot"
+	files += f" -C {token_directory} {token_basename}"
+	files += f" -C {password_directory} {password_basename}"
 	proc = subprocess.Popen([
 			f'tar -c -f- {files} | ssh {" ".join(ssh_connection_sharing)} {ssh_target} {" ".join(ssh_indirect_command)} tar -C {script_dir} -x -f-'
 		],
@@ -148,7 +154,8 @@ def process_line(line, update_function):
 def invoke_pilot_script(
 	ssh_connection_sharing, ssh_target, ssh_indirect_command,
 	script_dir, target, annex_name, queue_name, collector, token_file,
-	lifetime, owners, nodes, allocation, update_function, cluster_id
+	lifetime, owners, nodes, allocation, update_function, cluster_id,
+	password_file,
 ):
 	args = [
 		'ssh',
@@ -156,11 +163,12 @@ def invoke_pilot_script(
 		ssh_target,
 		* ssh_indirect_command,
 		f'{script_dir}/{target}.sh',
-		annex_name, queue_name, collector, f"{script_dir}/{token_file}",
+		annex_name, queue_name, collector, f"{script_dir}/{os.path.basename(token_file)}",
 		str(lifetime), f"{script_dir}/{target}.pilot", owners, str(nodes),
 		f"{script_dir}/{target}.multi-pilot",
 		f"{allocation}",
 		f"{cluster_id}",
+		f"{script_dir}/{os.path.basename(password_file)}",
 	]
 	proc = subprocess.Popen(
 		args,
@@ -244,17 +252,39 @@ if __name__ == "__main__":
 	owners = "tlmiller"
 	allocation = None
 
-	# Constants.  Note that token_file should expand ~.
-	collector = "htcondor-cm-hpcannex.osgdev.chtc.io"
-	token_file = "pilot-tokens/annex.osgdev.chtc.io"
+	# We use this same method to determine the user name in `htcondor job`,
+	# so even if it's wrong, it will at least consistently so.
+	username = getpass.getuser()
 
-	control_path = os.path.expanduser("~/.hpc-annex")
+	# Constants.
+	collector = "htcondor-cm-hpcannex.osgdev.chtc.io"
+	token_file = f"~/.condor/tokens.d/{username}@annex.osgdev.chtc.io"
+	control_path = "~/.hpc-annex"
+	password_file = f"~/.condor/annex_password_file"
+
+	token_file = os.path.expanduser(token_file)
+	if not os.path.exists(token_file):
+		print(f"Token file {token_file} doesn't exist.  Contact the system administrator.")
+		sys.exit(7)
+
+	control_path = os.path.expanduser(control_path)
 	if not os.path.isdir(control_path):
 		if not os.path.exists(control_path):
 			os.mkdir(control_path)
 		else:
 			print("~/.hpc-annex must be a directory, aborting.")
 			sys.exit(4)
+
+	password_file = os.path.expanduser(password_file)
+	if not os.path.exists(password_file):
+		try:
+			with open(password_file, "wb") as f:
+				password = secrets.token_bytes(16)
+				f.write(password)
+			os.chmod(password_file, 0o0400)
+		except OSError as ose:
+			print(f"Password file {password_file} didn't exist and couldn't be created {ose}.  Contact the system administrator.")
+			sys.exit(8)
 
 	# Derived constants.
 	ssh_connection_sharing = [
@@ -299,7 +329,7 @@ if __name__ == "__main__":
 	print(f"Populating {script_dir} ...")
 	populate_remote_temporary_directory(
 		ssh_connection_sharing, ssh_target, ssh_indirect_command,
-		script_dir, token_file
+		script_dir, token_file, password_file
 	)
 	print("... remote directory populated.")
 
@@ -375,7 +405,7 @@ if __name__ == "__main__":
 		script_dir, target, annex_name, queue_name, collector, token_file,
 		lifetime, owners, nodes, allocation,
 		lambda attribute, value: updateJobAd(cluster_id, attribute, value),
-		cluster_id,
+		cluster_id, password_file,
 	)
 
 	if rc == 0:
