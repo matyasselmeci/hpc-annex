@@ -101,14 +101,14 @@ UX/UI Work
   annex name explicitly; Miron may think that the output
   shouldn't include the slot name.
 
-- [ ] `htcondor annex shutdown <annex-name>`
+- [x] `htcondor annex shutdown <annex-name>`
 
   Shut down the annex.  The corresponding SLURM job(s) will terminate
   when the the startds shut themselves down, so we'd like to use
   HTCondor's security mechanisms if at all possible.  This will
   require additional back-end configuration, because right now HTCondor
   won't let us use the collector to pass an admin capability from
-  the startd.
+  the startd.  (Instead, we use a user-speific PASSWORD file.)
   
   - [ ] (ToddM) JaimeF is currently reviewing a PR that will 80% solve
     this problem, but would required the annex creator to have ADMIN
