@@ -1,7 +1,7 @@
 Feature Work
 ------------
 
-- [ ] Share `.sif` files between different machines in the same annex
+- [ ] (ToddM) Share `.sif` files between different machines in the same annex
   (request).
   
   In the glorious future, HTCondor will manage this automatically,
@@ -39,7 +39,7 @@ Feature Work
 UX/UI Work
 ----------
 
-- [x] `htcondor job submit ...`
+- [x] (ToddM) `htcondor job submit ...`
 
   Implement `--annex-name <annex-name>`, which limits the submitted job to
   running on _annex-name_.
@@ -55,7 +55,7 @@ UX/UI Work
   Also tag the job so that `htcondor annex create` has an easier / more
   reliable time finding the jobs it needs to scan for .sif files.
 
-- [ ] (Jason?) `htcondor annex create ...`
+- [ ] (Jason) `htcondor annex create ...`
 
   The back-end for this command is already implemented by `htpc-annex.py`,
   although that script does not presently take any arguments.
@@ -83,7 +83,7 @@ UX/UI Work
   and say why (because there aren't jobs in the queue for it).  See above,
   about sharing `.sif` files, for why this is a good idea.
 
-- [ ] (Jason?) `htcondor annex status <annex-name>`
+- [ ] (Jason) `htcondor annex status <annex-name>`
 
   The status of _annex-name_ will be obtainable from either the annex
   collector (a configuration constant) or from one or more local
@@ -106,7 +106,7 @@ UX/UI Work
   annex name explicitly; Miron may think that the output
   shouldn't include the slot name.
 
-- [x] `htcondor annex shutdown <annex-name>`
+- [x] (ToddM) `htcondor annex shutdown <annex-name>`
 
   Shut down the annex.  The corresponding SLURM job(s) will terminate
   when the the startds shut themselves down, so we'd like to use
@@ -135,5 +135,5 @@ between the three, as well, but it's by no means required, and if doing
 so would slow down adding either of the other two, then we should save
 the refactoring for later.
 
-- [ ] `Bridges 2`
-- [ ] `Expanse`
+- [ ] (Mat) `Bridges 2`
+- [ ] (Mat) `Expanse`
