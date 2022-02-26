@@ -259,9 +259,10 @@ def invoke_pilot_script(
 
 
 # FIXME: catch HTCondorIOError and retry.
-def updateJobAd(cluster_id, attribute, value):
+def updateJobAd(cluster_id, attribute, value, remotes):
 	schedd = htcondor.Schedd();
 	schedd.edit(cluster_id, f"hpc_annex_{attribute}", f'"{value}"')
+	remotes[attribute] = value
 
 
 def extract_sif_file(job_ad):
@@ -470,12 +471,13 @@ if __name__ == "__main__":
 	cluster_id = submit_result.cluster()
 	print(f"... done, with cluster ID {cluster_id}.")
 
+	remotes = {}
 	print(f"Submitting SLURM job on {target}:\n")
 	rc = invoke_pilot_script(
 		ssh_connection_sharing, ssh_target, ssh_indirect_command,
 		script_dir, target, annex_name, queue_name, collector, token_file,
 		lifetime, owners, nodes, allocation,
-		lambda attribute, value: updateJobAd(cluster_id, attribute, value),
+		lambda attribute, value: updateJobAd(cluster_id, attribute, value, remotes),
 		cluster_id, password_file,
 	)
 
@@ -484,5 +486,34 @@ if __name__ == "__main__":
 	else:
 		print(f"FAILED TO START ANNEX", file=sys.stderr)
 		print(f"return code {rc}", file=sys.stderr)
+		sys.exit(rc)
 
-	sys.exit(rc)
+	##
+	## Now that we've started the annex, rewrite the jobs targeting it
+	## so that they use the pre-staged .sif files.
+	##
+
+	# FIXME: This ends up requiring that the job go to the specific
+	# instance of the annex that modified it, which we don't want,
+	# and it also makes follow-up annex creation a pain because this
+	# file doesn't exist.  Instead, let's configure the remote startd
+	# to rewrite the job ad appropriately.
+	sif_dir = os.path.join(remotes["PILOT_DIR"], "sif")
+	for job_ad in annex_jobs:
+		job_id = f'{job_ad["ClusterID"]}.{job_ad["ProcID"]}'
+		sif_file = extract_sif_file(job_ad)
+		if sif_file is not None:
+			remote_sif_file = os.path.join(sif_dir, os.path.basename(sif_file))
+			schedd.edit(job_id, "ContainerImage", f'"{remote_sif_file}"')
+
+			transfer_input = job_ad["TransferInput"]
+			input_files = transfer_input.split(',')
+			if job_ad["ContainerImage"] in input_files:
+				input_files.remove(job_ad["ContainerImage"])
+				if len(input_files) != 0:
+					schedd.edit(job_id, "TransferInput", f'"{",".join(input_files)}"')
+				else:
+					schedd.edit(job_id, "TransferInput", "undefined")
+
+
+	sys.exit(0)
