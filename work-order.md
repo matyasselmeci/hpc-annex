@@ -77,6 +77,11 @@ UX/UI Work
     probably understand `~`, and be set to `~/.condor/tokens.d/<user>@annex.osgdev.chtc.io`,
     since that's the principal we'll be issuing tokens for
     automagically at some point.
+  
+  Important (Miron) note: if `htcondor annex create` doesn't find any jobs
+  tagged with the given annex name, it should refuse to create an annex
+  and say why (because there aren't jobs in the queue for it).  See above,
+  about sharing `.sif` files, for why this is a good idea.
 
 - [ ] (Jason?) `htcondor annex status <annex-name>`
 
