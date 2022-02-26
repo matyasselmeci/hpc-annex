@@ -139,10 +139,18 @@ trap cleanup EXIT
 
 cd ${PILOT_DIR}
 
+# The .sif files need to live in ${PILOT_DIR} for the same reason.  We
+# require that they have been transferred to the same directory as the
+# PILOT_BIN mainly because this script has too many arguments already.
+SIF_DIR=${PILOT_DIR}/sif
+mkdir ${SIF_DIR}
+PILOT_BIN_DIR=`dirname ${PILOT_BIN}`
+mv ${PILOT_BIN_DIR}/*.sif ${SIF_DIR}
+
 # The pilot scripts need to live in the ${PILOT_DIR} because the front-end
 # copied them into a temporary directory that it's responsible for cleaning up.
-cp ${PILOT_BIN} ${PILOT_DIR}
-cp ${MULTI_PILOT_BIN} ${PILOT_DIR}
+mv ${PILOT_BIN} ${PILOT_DIR}
+mv ${MULTI_PILOT_BIN} ${PILOT_DIR}
 PILOT_BIN=${PILOT_DIR}/`basename ${PILOT_BIN}`
 MULTI_PILOT_BIN=${PILOT_DIR}/`basename ${MULTI_PILOT_BIN}`
 
@@ -318,8 +326,8 @@ MODIFY_REQUEST_EXPR_REQUESTMEMORY = max({ 3072, quantize(RequestMemory, {128}) }
 
 mkdir local/passwords.d
 mkdir local/tokens.d
-cp ${TOKEN_FILE} local/tokens.d
-cp ${PASSWORD_FILE} local/passwords.d/POOL
+mv ${TOKEN_FILE} local/tokens.d
+mv ${PASSWORD_FILE} local/passwords.d/POOL
 
 #
 # Unpack the configuration on top.

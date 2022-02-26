@@ -97,6 +97,22 @@ def make_remote_temporary_directory(
 	sys.exit(2)
 
 
+def transfer_sif_files(
+	ssh_connection_sharing, ssh_target, ssh_indirect_command,
+	script_dir, sif_files
+):
+	file_list = [
+		f"-C {os.path.dirname(sif_file)} {os.path.basename(sif_file)}" for sif_file in sif_files
+	]
+	files = " ".join(file_list)
+
+	transfer_files(
+		ssh_connection_sharing, ssh_target, ssh_indirect_command,
+		# -h meaning "follow symlinks"
+		script_dir, f"-h {files}", "transfer .sif files",
+	)
+
+
 def populate_remote_temporary_directory(
 	ssh_connection_sharing, ssh_target, ssh_indirect_command,
 	script_dir, token_file, password_file
@@ -106,6 +122,17 @@ def populate_remote_temporary_directory(
 	files = f"{target}.sh {target}.pilot {target}.multi-pilot"
 	files += f" -C {token_directory} {token_basename}"
 	files += f" -C {password_directory} {password_basename}"
+
+	transfer_files(
+		ssh_connection_sharing, ssh_target, ssh_indirect_command,
+		script_dir, files, "populate remote temporary directory",
+	)
+
+
+def transfer_files(
+	sh_connection_sharing, ssh_target, ssh_indirect_command,
+	script_dir, files, task
+):
 	proc = subprocess.Popen([
 			f'tar -c -f- {files} | ssh {" ".join(ssh_connection_sharing)} {ssh_target} {" ".join(ssh_indirect_command)} tar -C {script_dir} -x -f-'
 		],
@@ -121,11 +148,11 @@ def populate_remote_temporary_directory(
 		if proc.returncode == 0:
 			return 0
 		else:
-			print("Failed to populate remote temporary directory, aborting.")
+			print(f"Failed to {task}, aborting.")
 			print(out)
 
 	except subprocess.TimeoutExpired:
-		print(f"Failed to populate remote temporary directory in {REMOTE_POPULATE_TIMEOUT} seconds, aborting.")
+		print(f"Failed to {task} in {REMOTE_POPULATE_TIMEOUT} seconds, aborting.")
 		proc.kill()
 		out, err = proc.communicate()
 
@@ -237,6 +264,22 @@ def updateJobAd(cluster_id, attribute, value):
 	schedd.edit(cluster_id, f"hpc_annex_{attribute}", f'"{value}"')
 
 
+def extract_sif_file(job_ad):
+	container_image = job_ad.get("ContainerImage")
+	if container_image is None:
+		return None
+
+	if not container_image.endswith(".sif"):
+		return None
+
+	if os.path.isabs(container_image):
+		return container_image
+
+	# Something else has gone terribly wrong if this is missing.
+	iwd = job_ad["iwd"]
+	return os.path.join(iwd, container_image)
+
+
 if __name__ == "__main__":
 	# FIXME: The primary command-line argument.
 	target = "stampede2"
@@ -298,6 +341,31 @@ if __name__ == "__main__":
 	ssh_indirect_command = [ "gsissh", target ]
 
 	##
+	## While we're requiring that jobs are submitted before creating the
+	## annex (for .sif pre-staging purposes), refuse to make the annex
+	## if no such jobs exist.
+	##
+	schedd = htcondor.Schedd()
+	annex_jobs = schedd.query(f'TargetAnnexName == "{annex_name}"')
+	if len(annex_jobs) == 0:
+		print(f"No jobs for '{annex_name}' are in the queue.  Use 'htcondor job submit --annex-name' to add them.")
+		sys.exit(9)
+
+	# Extract the .sif file from each job.
+	sif_files = set()
+	for job_ad in annex_jobs:
+		sif_file = extract_sif_file(job_ad)
+		if sif_file is not None:
+			if os.path.exists(sif_file):
+				sif_files.add(sif_file)
+			else:
+				print(f'Job {job_ad["ClusterID"]}.{job_ad["ProcID"]} specified container image \'{sif_file}\', which doesn\'t exist.')
+				sys.exit(10)
+
+	# The .sif files will be transferred to the target machine later.
+
+
+	##
 	## The user will do the 2FA/SSO dance here.
 	##
 	print("Making initial SSH connection...")
@@ -331,11 +399,14 @@ if __name__ == "__main__":
 		ssh_connection_sharing, ssh_target, ssh_indirect_command,
 		script_dir, token_file, password_file
 	)
+	transfer_sif_files(
+		ssh_connection_sharing, ssh_target, ssh_indirect_command,
+		script_dir, sif_files
+	)
 	print("... remote directory populated.")
 
 	# Submit local universe job.
 	print("Submitting state-tracking job...")
-	schedd = htcondor.Schedd()
 	# FIXME: this is obviously wrong.
 	local_job_executable = "local.py"
 	#
