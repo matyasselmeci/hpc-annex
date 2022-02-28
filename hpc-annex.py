@@ -101,15 +101,24 @@ def transfer_sif_files(
 	ssh_connection_sharing, ssh_target, ssh_indirect_command,
 	script_dir, sif_files
 ):
+	# We'd prefer to avoid the possibility of .sif name collisions,
+	# but for now that's too hard.  FIXME: detect it?
+	# Instead, we'll rewrite ContainerImage to be the basename in the
+	# job ad, assuming that TransferInput already has the correct path.
 	file_list = [
 		f"-C {os.path.dirname(sif_file)} {os.path.basename(sif_file)}" for sif_file in sif_files
 	]
 	files = " ".join(file_list)
 
+	# -h meaning "follow symlinks"
+	files = f"-h {files}"
+
+	# Meaning, "stuff these files into the sif/ directory."
+	files = f"--transform='s/^/sif\//' ${files}"
+
 	transfer_files(
 		ssh_connection_sharing, ssh_target, ssh_indirect_command,
-		# -h meaning "follow symlinks"
-		script_dir, f"-h {files}", "transfer .sif files",
+		script_dir, files, "transfer .sif files",
 	)
 
 
@@ -490,20 +499,20 @@ if __name__ == "__main__":
 
 	##
 	## Now that we've started the annex, rewrite the jobs targeting it
-	## so that they use the pre-staged .sif files.
+	## so that they don't transfer the .sif files we just pre-staged.
+	##
+	## The startd can't rewrite the job ad the shadow uses to decide
+	## if it should transfer the .sif file, but it can change ContainerImage
+	## to point the pre-staged image, if it's just the basename.  (Otherwise,
+	## it gets impossibly difficult to make the relative paths work.)
 	##
 
-	# FIXME: This ends up requiring that the job go to the specific
-	# instance of the annex that modified it, which we don't want,
-	# and it also makes follow-up annex creation a pain because this
-	# file doesn't exist.  Instead, let's configure the remote startd
-	# to rewrite the job ad appropriately.
 	sif_dir = os.path.join(remotes["PILOT_DIR"], "sif")
 	for job_ad in annex_jobs:
 		job_id = f'{job_ad["ClusterID"]}.{job_ad["ProcID"]}'
 		sif_file = extract_sif_file(job_ad)
 		if sif_file is not None:
-			remote_sif_file = os.path.join(sif_dir, os.path.basename(sif_file))
+			remote_sif_file = os.path.basename(sif_file)
 			schedd.edit(job_id, "ContainerImage", f'"{remote_sif_file}"')
 
 			transfer_input = job_ad["TransferInput"]

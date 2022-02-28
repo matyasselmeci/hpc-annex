@@ -145,7 +145,7 @@ cd ${PILOT_DIR}
 SIF_DIR=${PILOT_DIR}/sif
 mkdir ${SIF_DIR}
 PILOT_BIN_DIR=`dirname ${PILOT_BIN}`
-mv ${PILOT_BIN_DIR}/*.sif ${SIF_DIR}
+mv ${PILOT_BIN_DIR}/sif ${PILOT_DIR}
 
 # The pilot scripts need to live in the ${PILOT_DIR} because the front-end
 # copied them into a temporary directory that it's responsible for cleaning up.
@@ -297,6 +297,15 @@ AnnexName = \"${JOB_NAME}\"
 hpc_annex_request_id = \"${REQUEST_ID}\"
 STARTD_ATTRS = \$(STARTD_ATTRS) AnnexName IsAnnex hpc_annex_request_id
 MASTER_ATTRS = \$(MASTER_ATTRS) AnnexName IsAnnex hpc_annex_request_id
+
+# Force all container-universe jobs to try to use pre-staged .sif files.
+# This should be removed when we handle this in HTCondor proper.
+JOB_EXECUTION_TRANSFORM_NAMES = siffile
+JOB_EXECUTION_TRANSFORM_siffile @=end
+if defined MY.ContainerImage
+    EVALSET ContainerImage strcat(\"${SIF_DIR}/\", MY.ContainerImage)
+endif
+@end
 
 #
 # Subsequent configuration is machine-specific.
