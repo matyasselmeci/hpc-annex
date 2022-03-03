@@ -83,7 +83,7 @@ UX/UI Work
   and say why (because there aren't jobs in the queue for it).  See above,
   about sharing `.sif` files, for why this is a good idea.
 
-- [ ] (Jason) `htcondor annex status <annex-name>`
+- [x] `htcondor annex status <annex-name>`
 
   The status of _annex-name_ will be obtainable from either the annex
   collector (a configuration constant) or from one or more local
