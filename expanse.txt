@@ -1,0 +1,62 @@
+Some notes on Expanse:
+
+
+Standard compute nodes
+----------------------
+    Expanse's standard compute nodes have 2*64 cores and 256 GB of RAM (can
+request "249325M").
+The "shared" partition grants shared access; the "compute" partition grants
+exclusive (whole-node) access.
+
+    The standard unit of charge on Expanse is the Service Unit which on CPU
+partitions is 1 core * 2 GB of RAM (whichever is greater -- requesting 1 core
+and 256 GB costs the same as 128 cores and 1 GB).  Resource requests should be
+quantized accordingly.  Requesting a whole node using the "compute" partition
+costs the same as requesting all the resources of a node using the "shared"
+partition.
+
+    You can't have multi-node jobs in the "shared" partition, but you can have
+a lot more of them -- 4096 jobs running in the "shared" partition, vs. 32 jobs
+(of up to 32 nodes each) in the "compute" partition.
+
+
+Specialty (GPU and large-machine nodes)
+---------------------------------------
+    Expanse's GPU nodes have 2*20 cores, 384 GB ("377393M") of RAM, and
+4 GPUs.  The "gpu-shared" partition grants shared access; the "gpu" partition
+grants exclusive (whole-node) access.  Expanse's large-memory nodes have
+2*64 cores and 2 TB ("2055652M") of RAM.  The "large-shared" partition grants
+shared access; there is no exclusive access.
+
+    Large-memory machines use the standard SU (1 core, 2 GB); you must
+request at least 256 GB (i.e. your job must not fit into one of their regular
+machines).  They only have 4 large-memory machines so you're only allowed to
+have 1 large-mem job running at a time.
+
+    A GPU SU is 1 GPU, 10 cores, and 96 GB of RAM.  Like with compute,
+requesting a whole-node slot with the "gpu" partition costs the same as
+requesting all the resources of a node with the "gpu-shared" partition.
+Also like with compute, multi-node jobs need the "gpu" partition but you can
+have more single-node GPU jobs running in the "gpu-shared" partition.
+
+Miscellaneous
+-------------
+    Specifying the partition/queue (-p) is necessary, as is the account (-A),
+and walltime (-t), the max for which is 48:00:00 on most partitions; 0:30:00
+on "debug" and "gpu-debug".
+
+    To get a list of your accounts, run
+    $ module load sdsc && expanse-client user
+    
+    To get an interactive debugging job, run
+    $ srun --partition=debug --pty --account=<account> \
+        --nodes=1 --ntasks-per-node=1 --mem=1G \
+        -t 00:30:00 --wait=0 --export=ALL \
+        /bin/bash
+
+    There are preemptible partitions "preempt" and "gpu-preempt" which can be
+used for 7 days and are charged at 80% of the usual rate.
+
+    Nodes have a local SSD scratch disk accessible under
+"/scratch/$USER/job_$SLURM_JOB_ID" (these variables are available during job
+execution).
