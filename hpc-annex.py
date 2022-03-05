@@ -292,18 +292,18 @@ def extract_sif_file(job_ad):
 
 if __name__ == "__main__":
 	# FIXME: The primary command-line argument.
-	target = "stampede2"
+	target = "expanse"
 
 	# FIXME: command-line arguments (required).
-	nodes = 2
+	nodes = 1
 	lifetime = 7200
 
 	# FIXME: command-line options (may override defaults).
 	# FIXME: Verify that annex_name is a valid SLURM job name.
 	annex_name = "hpc-annex"
-	queue_name = "development"
-	owners = "tlmiller"
-	allocation = None
+	queue_name = "compute"
+	owners = "matyas"
+	allocation = "nca118"
 
 	# We use this same method to determine the user name in `htcondor job`,
 	# so even if it's wrong, it will at least consistently so.
@@ -347,7 +347,7 @@ if __name__ == "__main__":
 	]
 	# FIXME: should be derived two command-line arguments with
 	# $USER and 'login.xsede.org' as arguments.
-	ssh_target = "tlmiller@login.xsede.org"
+	ssh_target = "matyas@login.xsede.org"
 	ssh_indirect_command = [ "gsissh", target ]
 
 	##
