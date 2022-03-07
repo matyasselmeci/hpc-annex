@@ -1,7 +1,7 @@
 Feature Work
 ------------
 
-- [ ] (ToddM) Share `.sif` files between different machines in the same annex
+- [x] (ToddM) Share `.sif` files between different machines in the same annex
   (request).
   
   In the glorious future, HTCondor will manage this automatically,
