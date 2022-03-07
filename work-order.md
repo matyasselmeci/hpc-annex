@@ -55,7 +55,7 @@ UX/UI Work
   Also tag the job so that `htcondor annex create` has an easier / more
   reliable time finding the jobs it needs to scan for .sif files.
 
-- [ ] (Jason) `htcondor annex create ...`
+- [x] (Jason) `htcondor annex create ...`
 
   The back-end for this command is already implemented by `htpc-annex.py`,
   although that script does not presently take any arguments.
