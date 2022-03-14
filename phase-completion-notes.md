@@ -48,3 +48,8 @@ Phase 2+
   to specify the size appropriately.
 - Look into supporting "noun" plug-ins in `htcondor`.  This may be a (partial) solution to the
   documentation problem, but `htcondor gromacs ...` also sounds really attractive to GregT.
+- Some command, currently unnamed, to unbind a job from an annex.  It’s not clear if this is really worth
+  it – ChristinaK thinks that many users may just instinctively remove and resubmit jobs targeting the
+  wrong annex.  Also, we intend to make targeting a specific annex optional in the near future, so this
+  may be largely wasted work.  (If you _want_ a job only to run on a specific annex and change your mind,
+  I guess such a tool would be useful.)
