@@ -1,10 +1,11 @@
 Phase 1
 -------
 
+- [ ]  (HTCONDOR-1004)  UI tweaks before Miron demo.
 - [ ]  (Mat)  Expanse back end.  Well on its way.
 - [ ]  Bridges 2 back end.
 - [ ]  Minimal front-end changes to support new machines.
-- [ ]  HTCONDOR-1004
+- [ ]  (HTCONDOR-958)  Code review and documentation.
 - [ ]  How do we deal with documentation and --help for features not intended for general use?
        (ToddT is thinking maybe we can reduce the infrastructure requirements so that it's
        reasonable to document them.)
