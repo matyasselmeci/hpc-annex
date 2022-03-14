@@ -13,10 +13,14 @@ Phase 1
 Phase 2+
 --------
 
+- Frontera back-end.
 - `htcondor annex create` needs to know about the various queue restrictions and enforce them
   itself, so it doesn't make the user login only to get bounced back right away for an invalid
   request.
-- Frontera back-end.
+- Right now, `htcondor annex create` is used to both create annexes and expand them.  This is,
+  at best, confusing.  We should certainly add something like `htcondor annex expand` (even if
+  it’s just an alias); it’s not clear if we should also require users to specify expand rather
+  than create if there’s already an annex by that name (as recorded in the local universe job queue).
 - Support adding jobs to an annex after its creation.
   - Running `htcondor job submit --annex-name` will only work right now (for container-universe jobs) if:
     - the container image was already staged to the annex, and
