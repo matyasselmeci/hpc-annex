@@ -53,3 +53,6 @@ Phase 2+
   wrong annex.  Also, we intend to make targeting a specific annex optional in the near future, so this
   may be largely wasted work.  (If you _want_ a job only to run on a specific annex and change your mind,
   I guess such a tool would be useful.)
+- Should `htcondor annex create` not have "mandatory options" (named arguments)?  This was done without
+  much thought, but since all of the machine names are also valid annex names, it seems like maybe
+  purely postional arguments aren't the right thing either.  Maybe `name@machine`?
