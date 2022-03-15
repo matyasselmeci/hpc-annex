@@ -55,4 +55,5 @@ Phase 2+
   I guess such a tool would be useful.)
 - Should `htcondor annex create` not have "mandatory options" (named arguments)?  This was done without
   much thought, but since all of the machine names are also valid annex names, it seems like maybe
-  purely postional arguments aren't the right thing either.  Maybe `name@machine`?
+  purely postional arguments aren't the right thing either.  Maybe `name@machine`?  The other argument
+  in favor would be if we were being careful to be consistent/orthogonal across all our commands...
