@@ -8,12 +8,13 @@
   - `git clone https://github.com/htcondor/htcondor.git`
   - (check out the appropriate branch)
   - install token in `~/.condor/tokens.d`
-    - ```condor_token_create -identity tlmiller@annex.osgdev.chtc.io \
+    ```
+    condor_token_create -identity tlmiller@annex.osgdev.chtc.io \
          -authz READ \
          -authz ADVERTISE_STARTD \
          -authz ADVERTISE_MASTER \
          -authz ADVERTISE_SCHEDD \
-      > tlmiller@annex.osgdev.chtc.io```
+     > tlmiller@annex.osgdev.chtc.io```
   - mkdir `~/.hpc-annex`  (should this become `~/.condor/hpc-annex`?)
   - set `LIBEXEC` in `~/.condor/user_config` because the system install
     of HTCondor doesn't have HPC Annex yet, to `~/condor/install/libexec`,
