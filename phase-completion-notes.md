@@ -69,3 +69,6 @@ Phase 2+
   purely postional arguments aren't the right thing either.  Another argument
   in favor would be if we were being careful to be consistent/orthogonal
   across all our commands...
+- Add `hpc_annex_lifetime` to the startds for `annex status`'s convenience
+  (so that we can always say how long the annex has left, even if the local
+  universe job was removed or submitted on a different machine)?
