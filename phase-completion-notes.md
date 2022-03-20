@@ -18,8 +18,8 @@ Phase 2+
 - `htcondor annex create` needs to know about the various queue restrictions
   and enforce them itself, so it doesn't make the user login only to get
   bounced back right away for an invalid request.  Some of this information
-  has already been encoded, but it should probably be read from a config file
-  (of some sort) instead.
+  has already been encoded, but none if it is currently being use, and it
+  should probably be read from a config file   (of some sort) instead. 
 - Right now, `htcondor annex create` is used to both create annexes and expand
   them.  This is, at best, confusing.  We should certainly add something like
   `htcondor annex expand` (even if it’s just an alias); it’s not clear if we
