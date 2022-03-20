@@ -136,4 +136,4 @@ so would slow down adding either of the other two, then we should save
 the refactoring for later.
 
 - [ ] (Mat) `Bridges 2`
-- [ ] (Mat) `Expanse`
+- [x] (Mat) `Expanse`
