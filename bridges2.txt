@@ -1,0 +1,90 @@
+Some notes on PSC-Bridges-2:
+
+Reference: https://www.psc.edu/resources/bridges-2/user-guide-2/
+
+Accounting
+----------
+    Bridges-2 has separate allocations for Regular Memory (RM), Extreme
+Memory (EM) and GPU jobs.  You are charged per core (RM, EM) or per GPU
+(GPU).  The allocations can have the same allocation ID though.
+
+Regular Memory nodes
+--------------------
+    Bridges-2's standard nodes are the RM (Regular Memory) nodes.  They
+have 2*64 cores and 256 GB of RAM.  The "RM-shared" partition grants shared
+access; the "RM" partition grants exclusive (whole-node) access.
+
+    You are charged one RM SU per hour per core.  RAM is not requested
+separately -- your job is given RAM in proportion to your core request.
+
+    Jobs in the "RM" partition can have a max of 50 nodes (6400 cores total).
+Jobs in the "RM-shared" partition can have a max of 1 node.  Also, they can
+only have 64 of a machine's 128 cores (and presumably only 128 of the 256 GB
+of memory).
+
+    Bridges-2's "RM-512" partition runs jobs on variants of the RM nodes that
+have the same 2*64 cores but 512 GB instead of 256 GB of RAM; these are
+whole-machine slots.  They cost the same as RM and the max node count is 2.
+
+    Wall time limits are 48 hours on each of these.
+    Queue limits are not documented.
+
+Extreme Memory nodes
+--------------------
+    The Extreme Memory (EM) nodes have 96 cores and 4 TB each.  Jobs must
+request at least 24 cores; memory is allocated proportionally (so 40 GB per
+core).  Presumably EM jobs are shared (otherwise why request any less than
+the whole machine?) but they can also be multinode, though the node limit is
+not documented.
+
+    You are charged one EM SU per hour per core.
+    Wall time limits are 5 days.  Queue limits are not documented.
+
+GPU nodes
+---------
+    The GPU nodes can be accessed via the "GPU" (exclusive) and "GPU-shared"
+partitions.  They are complicated.  Link: 
+https://www.psc.edu/resources/bridges-2/user-guide-2/#partitions
+
+    There are multiple types of GPU nodes, all accessbile from the same
+partition; you can pick which node you want by specifying the GPU type
+(`#SBATCH --gpus=type:n`), though last time I tried it, type was optional.
+Type is either "v100-16" (Volta, 8 GPUs w/ 16 GB of GPU RAM) or "v100-32"
+(either: Tesla, 8 GPUs w/ 32 GB of GPU RAM, or "the DGX-2" with 16 GPUs w/
+32 GB of GPU RAM).  Shared GPU jobs cannot use the DGX-2.
+
+    Jobs in the "GPU" partition must specify the total number of GPUs used
+by the job (so this means a multiple of 8 since you are getting whole nodes).
+There is a GPU limit of 64 instead of a node limit.  GPU-shared jobs can
+request 1 node with 1 to 4 GPUs.
+
+    You will be allocated RAM and cores in proporition to the GPUs requested;
+don't bother specifying them in the submit file.  Here are the tables, just
+in case:
+https://www.psc.edu/resources/bridges-2/user-guide-2/#system-configuration
+
+    You are charged one GPU SU per GPU per hour.
+    Wall time limits are 48 hours.  Queue limits are not documented.
+
+Miscellaneous
+-------------
+    If no SLURM options are specified, you get a 30-minute 1-node job on the
+RM queue using your default allocation. Max walltime is 5 days (120 hours)
+for the EM partition, 48 hours on all others.
+
+    To get a list of your accounts, run
+    $ projects
+    
+    To get an interactive debugging job, run
+    $ interact <slurm options>
+    By default you get a 1-hour 1-node 1-core job on the "RM-small" partition
+    which I guess is a variant of RM-shared.
+    (full docs: https://www.psc.edu/resources/bridges-2/user-guide-2/#interactive-sessions)
+
+    $PROJECT is shared project storage.
+    $LOCAL is local scratch space.
+    $RAMDISK is just /dev/shm which is half the memory (128 GB on standard nodes).
+    
+    Privileged Singularity is already in $PATH at /usr/bin/singularity.
+Network mounts /jet (contains $HOME) and /ocean (contains $PROJECT) are
+automatically bind-mounted in.
