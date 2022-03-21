@@ -14,7 +14,7 @@
          -authz ADVERTISE_STARTD \
          -authz ADVERTISE_MASTER \
          -authz ADVERTISE_SCHEDD \
-     > tlmiller@annex.osgdev.chtc.io```
+     > tlmiller@annex.osgdev.chtc.io
   - mkdir `~/.hpc-annex`  (should this become `~/.condor/hpc-annex`?)
   - set `LIBEXEC` in `~/.condor/user_config` because the system install
     of HTCondor doesn't have HPC Annex yet, to `~/condor/install/libexec`,
