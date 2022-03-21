@@ -2,13 +2,18 @@ Phase 1
 -------
 
 - [x]  (HTCONDOR-1004)  UI tweaks before Miron demo.
-- [ ]  (Mat)  Expanse back end.  In code review.
+- [ ]  (HTCONDOR-984)  [Mat] Expanse back end.  In code review.
 - [ ]  Minimal front-end changes to support new machine(s).  In code review.
-- [ ]  Bridges 2 back end.
+- [ ]  (HTCONDOR-983)  [Mat] Bridges 2 back end.
 - [ ]  (HTCONDOR-958)  Code review and documentation.
 - [ ]  How do we deal with documentation and --help for features not intended
        for general use?  (ToddT is thinking maybe we can reduce the
        infrastructure requirements so that it's reasonable to document them.)
+- [ ]  login04 appears to be working again, but we need to test multiple
+       people trying to run jobs on their own annexes at the same time.
+- [ ]  Test login05.
+- [ ]  Document necessary per-user preparations.  (Issue a token and drop
+       it in the right place.)
 
 Phase 2+
 --------
