@@ -2,9 +2,9 @@ Phase 1
 -------
 
 - [x]  (HTCONDOR-1004)  UI tweaks before Miron demo.
-- [ ]  (HTCONDOR-984)  [Mat] Expanse back end.  In code review.
-- [ ]  Minimal front-end changes to support new machine(s).  In code review.
-- [ ]  (HTCONDOR-983)  [Mat] Bridges 2 back end.
+- [x]  (HTCONDOR-984)  [Mat] Expanse back end.  In code review.
+- [x]  Minimal front-end changes to support new machine(s).  In code review.
+- [ ]  (HTCONDOR-983)  [Mat] Bridges 2 back end.  In progress.
 - [ ]  (HTCONDOR-958)  Code review and documentation.
 - [ ]  How do we deal with documentation and --help for features not intended
        for general use?  (ToddT is thinking maybe we can reduce the
