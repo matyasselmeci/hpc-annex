@@ -135,5 +135,5 @@ between the three, as well, but it's by no means required, and if doing
 so would slow down adding either of the other two, then we should save
 the refactoring for later.
 
-- [ ] (Mat) `Bridges 2`
+- [x] (Mat) `Bridges 2`
 - [x] (Mat) `Expanse`
