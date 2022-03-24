@@ -4,9 +4,9 @@ Phase 1
 We need to get all of the C++ code changes in before the code freeze.
 In particular:
 - [ ]  (HTCONDOR-1024)  `condor_token_fetch -key`; in code review.  (JaimeF)
-- [ ]  (HTCONDOR-1015)  `htcondor job submit --annex-name` as a job transform;
-       in code review.  (ToddM)  Needs end-to-end testing with Python code changes.
-- [ ]  (HTCONDOR-1022)  Add a job transform to HTCONDOR-1015 prevent inadvertent flocking.  (ToddM)
+- [X]  (HTCONDOR-1015)  `htcondor job submit --annex-name` as a job transform;
+       in code review.  (ToddM)
+- [ ]  (HTCONDOR-1022)  Add a job transform to prevent inadvertent flocking.  (ToddM)
 
 Required changes before the release:
 - [ ]  (HTCONDOR-983)   The Bridges 2 back-end; in code review.  (ToddM)
