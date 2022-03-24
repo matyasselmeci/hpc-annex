@@ -1,23 +1,33 @@
 Phase 1
 -------
 
-- [x]  (HTCONDOR-1004)  UI tweaks before Miron demo.
-- [x]  (HTCONDOR-984)  [Mat] Expanse back end.  In code review.
-- [x]  Minimal front-end changes to support new machine(s).  In code review.
-- [ ]  (HTCONDOR-983)  [Mat] Bridges 2 back end.  In progress.
-- [ ]  (HTCONDOR-958)  Code review and documentation.
-- [ ]  How do we deal with documentation and --help for features not intended
-       for general use?  (ToddT is thinking maybe we can reduce the
-       infrastructure requirements so that it's reasonable to document them.)
-- [ ]  login04 appears to be working again, but we need to test multiple
-       people trying to run jobs on their own annexes at the same time.
-- [ ]  Test login05.
-- [ ]  Document necessary per-user preparations.  (Issue a token and drop
-       it in the right place.)
+We need to get all of the C++ code changes in before the code freeze.
+In particular:
+- [ ]  (HTCONDOR-1024)  `condor_token_fetch -key`; in code review.  (JaimeF)
+- [ ]  (HTCONDOR-1015)  `htcondor job submit --annex-name` as a job transform;
+       in code review.  (ToddM)  Needs end-to-end testing with Python code changes.
+- [ ]  (HTCONDOR-1022)  Add a job transform to HTCONDOR-1015 prevent inadvertent flocking.  (ToddM)
+
+Required changes before the release:
+- [ ]  (HTCONDOR-983)   The Bridges 2 back-end; in code review.  (ToddM)
+- [ ]  (HTCONDOR-1020)  Fetch a new token on every annex creation;
+       in progress.  (ToddM)
+- [ ]  We need to add the HPC annex CM as an old-school flock target on login*.osgconnect.net;
+       per-user flocking is broken for multiple users (flocking to the same CM).  We may need
+       to disable per-user flocking in the job transform (but hopefully not).
+- [ ]  (HTCONDOR-958)   Documentation and code review.
+
+Good ideas:
+- [ ]  (HTCONDOR-1021)  The `htcondor annex` tools (and `htcondor job submit --annex-name`)
+       should check if the HTCONDOR-1015 knob is enable and politely refuse to do anything if not.  (ToddM)
+
+We also want to demo the code for Miron.
 
 Phase 2+
 --------
 
+- [ ]  Write a retro design doc for Phase 1.
+- [ ]  Write a proto design doc for Phase 2. ;)
 - [ ]  Frontera back-end.
 - [ ]  EXECUTE should be on local disk.
 - `htcondor annex create` needs to know about the various queue restrictions
