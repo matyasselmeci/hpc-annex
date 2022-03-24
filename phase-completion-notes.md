@@ -18,8 +18,9 @@ Required changes before the release:
 - [ ]  (HTCONDOR-958)   Documentation and code review.
 
 Good ideas:
-- [ ]  (HTCONDOR-1021)  The `htcondor annex` tools (and `htcondor job submit --annex-name`)
-       should check if the HTCONDOR-1015 knob is enable and politely refuse to do anything if not.  (ToddM)
+- [ ]  (HTCONDOR-1021)  The `htcondor annex` nouns should check if `HPC_ANNEX_ENABLED`
+       is set and politely refuse to do anything if not.  Done for `htcondor job submit --annex-name`
+       in HTCONDOR-1025.  (ToddM)
 
 We also want to demo the code for Miron.
 
