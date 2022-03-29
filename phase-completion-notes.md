@@ -9,8 +9,8 @@ In particular:
 
 Required changes before the release:
 - [x]  (HTCONDOR-1025)  Modify `htcondor job submit --annex-name` to use job transform.
-- [ ]  (HTCONDOR-1033)  2022-03-25 demo feedback (parts will become other tickets, some in
-       phase 2).
+- [x]  (HTCONDOR-1033)  2022-03-25 demo feedback.  (ToddM)  Parts will become other tickets, some in
+       phase 2).  In code review.
 - [ ]  (HTCONDOR-1020)  Fetch a new token on every annex creation;
        in progress.  (ToddM)
 - [ ]  (HTCONDOR-983)   The Bridges 2 back-end; in code review.  (ToddM)  Will need the
