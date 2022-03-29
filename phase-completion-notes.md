@@ -3,7 +3,7 @@ Phase 1
 
 We need to get all of the C++ code changes in before the code freeze.
 In particular:
-- [ ]  (HTCONDOR-1024)  `condor_token_fetch -key`; in code review.
+- [x]  (HTCONDOR-1024)  `condor_token_fetch -key`; in code review.
 - [x]  (HTCONDOR-1015)  `htcondor job submit --annex-name` as a job transform.
 - [x]  (HTCONDOR-1022)  Add a job transform to prevent inadvertent flocking.
 
@@ -16,13 +16,13 @@ Required changes before the release:
        per-user flocking is broken for multiple users (flocking to the same CM).  We may need
        to disable per-user flocking in the job transform (but hopefully not).
 - [ ]  (HTCONDOR-958)   Documentation and code review.
+- [ ]  (HTCONDOR-1033)  2022-03-25 demo feedback (parts will become other tickets, some in
+       phase 2).
 
 Good ideas:
 - [ ]  (HTCONDOR-1021)  The `htcondor annex` nouns should check if `HPC_ANNEX_ENABLED`
        is set and politely refuse to do anything if not.  Done for `htcondor job submit --annex-name`
        in HTCONDOR-1025.  (ToddM)
-
-We also want to demo the code for Miron.
 
 Phase 2+
 --------
