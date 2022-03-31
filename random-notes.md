@@ -20,3 +20,17 @@
     of HTCondor doesn't have HPC Annex yet, to `~/condor/install/libexec`,
     which contains an `annex` symlink pointing at `src/condor_scripts/annex`.
   - `src/condor_tools/htcondor` invokes properly...
+
+#### Extra (Temporary) Annex CM configuration
+
+```
+# Harumph.
+TRUST_DOMAIN = azaphrael.org
+
+# Allow any pilot to whom we've given a token to advertise.
+ALLOW_ADVERTISE_STARTD = *@$(TRUST_DOMAIN)
+# Allow any user to whom we've given a token to flock.
+ALLOW_ADVERTISE_SCHEDD = *@$(TRUST_DOMAIN)
+# Allow ourselves and the pilots to advertise masters.
+ALLOW_ADVERTISE_MASTER = $(ALLOW_ADVERTISE_STARTD) $(ALLOW_ADMINISTRATOR)
+```
