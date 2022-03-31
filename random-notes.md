@@ -33,4 +33,26 @@ ALLOW_ADVERTISE_STARTD = *@$(TRUST_DOMAIN)
 ALLOW_ADVERTISE_SCHEDD = *@$(TRUST_DOMAIN)
 # Allow ourselves and the pilots to advertise masters.
 ALLOW_ADVERTISE_MASTER = $(ALLOW_ADVERTISE_STARTD) $(ALLOW_ADMINISTRATOR)
+
+# Enable SSL (unnecessary but maybe convenient).
+# AUTH_SSL_SERVER_CERTFILE = /etc/grid-security/condor-le/tls.crt
+# AUTH_SSL_SERVER_KEYFILE = /etc/grid-security/condor-le/tls.key
+```
+
+#### Extra (Testing) AP configuration
+
+```
+# Allow us to connect using SSL to the collector.
+SEC_DEFAULT_AUTHENTICATION_METHODS = FS, IDTOKENS, SSL
+# AUTH_SSL_CLIENT_CAFILE = /etc/ssl/certs/ca-certificates.crt
+
+# Because per-user flocking doesn't actually work.  I don't know why
+# MIN_FLOCK_LEVEL is, in practice, required.
+FLOCK_TO = htcondor-cm-hpcannex.osgdev.chtc.io
+MIN_FLOCK_LEVEL = 1
+
+# IDTOKENS assumes that if we share a trust domain, we share our default
+# signing keys; this is probably fine, except that it tries the shared-secret
+# fallback method BEFORE trying to use a token.
+SEC_TOKEN_POOL_SIGNING_KEY_FILE = $(LOCAL)/passwords.d/hpcannex-key
 ```
