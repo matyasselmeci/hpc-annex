@@ -1,0 +1,71 @@
+Some notes on Purdue-Anvil:
+
+Reference: https://www.rcac.purdue.edu/knowledge/anvil
+
+Accounting
+----------
+    Compute charges are for 1 SU for every core or 2 GB.
+Jobs on the large memory nodes are charged at 4x the rate.  GPU jobs
+are 1 per GPU.  All costs come out of the same bucket.
+
+
+Regular Nodes
+-------------
+
+128 cores (2 CPUs * 64 cores/CPU - no hyperthreading);
+256 GB (256000 MB). "shared" and "debug" are shared; "standard" and
+"wide" are whole node.  You are charged 1 SU/core/hour.
+
+"Max Queued" includes running jobs.
+
+Partition | Nodes/Job | Cores/Job   | Duration | Max Running | Max Queued |
+----------+-----------+-------------+----------+-------------+------------|
+debug     | 2 nodes   | 256 cores   | 2 hrs    | 1           | 2          |
+standard  | 16 nodes  | 2,048 cores | 96 hrs   | 64          | 128        |
+wide      | 56 nodes  | 7,168 cores | 12 hrs   | 5           | 10         |
+shared    | 1 node    | 128 cores   | 96 hrs   | 6400 cores  | -          |
+
+
+GPU Nodes
+---------
+
+128 cores, 512 GB (512000 MB), 4 A100s.  Shared, each GPU gets you
+120000 MB; you are charged 1 SU/GPU/hour.
+
+"Max Queued" includes running jobs.
+
+Partition | Nodes/Job | GPUs/Job | Duration | Max Running | Max Queued |
+----------+-----------+----------+----------+-------------+------------|
+gpu-debug | 1 node    | 2 gpus   | 0.5 hrs  | 1           | 2          |
+gpu       | -         | -        | 48 hrs   | 8 gpus      | -          |
+
+> For GPU jobs, make sure to use --gres=gpu command instead of
+> --gpu or -G for single-node GPU jobs, and use --gpus-per-node command
+> instead of --gres=gpu or --gpu for multi-node GPU jobs...
+
+Large-Memory nodes
+------------------
+
+128 cores, 1 TB (1024000).  Shared, each core gets you 8000 MB;
+you are charged 4 SUs/core/hour.
+
+"Max Queued" includes running jobs.
+
+Partition | Nodes/Job | Cores/Job | Duration | Max Running | Max Queued |
+----------+-----------+-----------+----------+-------------+------------|
+highmem   | 1 node    | 128 cores | 48 hrs   | 2           | 4          |
+
+
+Miscellaneous
+-------------
+    To get a list of your allocations, run:
+    $ mybalance
+
+    To get an interactive debugging job, run
+    $ sinteractive <slurm options>
+
+    $SCRATCH (/anvil/scratch) is temporary storage on a shared file system.
+    $PROJECT (/anvil/projects)is shared project storage; $WORK is an alias.
+
+    Privileged Singularity is already in $PATH at /usr/bin/singularity.
+    $HOME and /anvil are bind-mounted in.
