@@ -11,8 +11,9 @@ Memory (EM) and GPU jobs.  You are charged per core (RM, EM) or per GPU
 Regular Memory nodes
 --------------------
     Bridges-2's standard nodes are the RM (Regular Memory) nodes.  They
-have 2*64 cores and 256 GB of RAM.  The "RM-shared" partition grants shared
-access; the "RM" partition grants exclusive (whole-node) access.
+have 2*64 cores and 256 GB (253000MB) of RAM.
+The "RM-shared" partition grants shared access; the "RM" partition grants
+exclusive (whole-node) access.
 
     You are charged one RM SU per hour per core.  RAM is not requested
 separately -- your job is given RAM in proportion to your core request.
@@ -23,8 +24,9 @@ only have 64 of a machine's 128 cores (and presumably only 128 of the 256 GB
 of memory).
 
     Bridges-2's "RM-512" partition runs jobs on variants of the RM nodes that
-have the same 2*64 cores but 512 GB instead of 256 GB of RAM; these are
-whole-machine slots.  They cost the same as RM and the max node count is 2.
+have the same 2*64 cores but 512 GB (510000MB) instead of 256 GB of RAM;
+these are whole-machine slots.  They cost the same as RM and the max node
+count is 2.
 
     Wall time limits are 48 hours on each of these.
     Queue limits are not documented.
