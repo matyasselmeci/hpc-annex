@@ -32,6 +32,11 @@ Phase 2+
 - [ ]  Write a proto design doc for Phase 2. ;)
 - [ ]  Frontera back-end.
 - [ ]  EXECUTE should be on local disk.
+- [ ]  Refactor back-end scripts.  All of the machines so far share identical
+       `.pilot` and `.multi-pilot` scripts, so we should just condense them.
+       The `.sh` scripts are all very similar; it should be possible to make
+       one script and have it source in machine-specific overrides (function
+       redefinitions) as necessary, or something.
 - `htcondor annex create` needs to know about the various queue restrictions
   and enforce them itself, so it doesn't make the user login only to get
   bounced back right away for an invalid request.  Some of this information
