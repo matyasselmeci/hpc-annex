@@ -21,7 +21,7 @@ Required changes before the release:
 - [ ]  (HTCONDOR-958)   Documentation and code review.
 
 Good ideas:
-- [ ]  (HTCONDOR-1021)  The `htcondor annex` nouns should check if `HPC_ANNEX_ENABLED`
+- [x]  (HTCONDOR-1021)  The `htcondor annex` nouns should check if `HPC_ANNEX_ENABLED`
        is set and politely refuse to do anything if not.  Done for `htcondor job submit --annex-name`
        in HTCONDOR-1025.  (JasonP)
 
