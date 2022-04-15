@@ -38,9 +38,9 @@ SSH with the appropriate options to establish a shared connection, so that
 the front-end can return as soon as possible to the user.
 
 The front-end will use the shared connection to transfer the back-end
-script(s) to the target machine.  We intend to keep the connection open
+scripts to the target machine.  We intend to keep the connection open
 (and the researcher waiting) for error reporting and handling purposes until
-the pilot job goes into the queue.  By that time, the front-end will have
+the pilot job goes into the SLURM queue.  By that time, the front-end will have
 submitted the local-universe job responsible for maintaining state about
 the newly-created HPC annex, and future invocations of the front-end will
 be able to use the queue to retrieve that state.  Additionally, the front-end
