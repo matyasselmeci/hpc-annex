@@ -94,3 +94,7 @@ Phase 2+
 - Add `hpc_annex_lifetime` to the startds for `annex status`'s convenience
   (so that we can always say how long the annex has left, even if the local
   universe job was removed or submitted on a different machine)?
+- Improve the job transforms in the metaknob.
+  - `ANNEX_TOKEN_DOMAIN = $(2:$(ANNEX_COLLECTOR))
+  - Replace the expression in the second (optional) transform with another
+    defaulted variable so that it can be tweaked more easily.
