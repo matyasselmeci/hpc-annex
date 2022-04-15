@@ -46,23 +46,24 @@ the newly-created HPC annex, and future invocations of the front-end will
 be able to use the queue to retrieve that state.  Additionally, the front-end
 is responsible for the initial staging of `.sif` files (based on which ones
 are required by jobs targeting the annex at submissions time).  These files
-will be stored and shared storage, and the job will transformed at submit time
+will be kept on shared storage, and the job will transformed at submit time
 (to make sure the `.sif` is not transferred) and again by the startd (to
 point its `.sif` file at the prestaged copy).
 
-The front-end is (will be) responsible for machine-specific logical constraints,
-because it would suck for the user to go through the log-in sign and dance
+The front-end will be responsible for machine/queue-specific logical constraints,
+because it would suck for the user to go through the log-in song-and-dance
 and then be told about a logic error we could have detected earlier.
 
 The back-end is responsible for downloading HTCondor and any administrative
 customization of the pilot config from the corresponding well-known
 locations.  (Barring truly dire need, the pilots will use the official
-release tarballs.)  It is also responsible for constructing the pilot's on-disk
+release tarballs.)  The back-end is also responsible for constructing the pilot's on-disk
 environment in a temporary directory and submitting the pilot(s) as a job to the
 local batch system.  To support multi-node jobs (necessary, because some SLURM
 queues have very shallow depth/simultaneous jobs limits), we run a script that
-SSHs to each node in the job (including itself) and waits for the master to
-terminate.  When they're all done, it's safe to clean up the shared directory.
+forks an SSH to each node in the job (including itself) into the background
+and waits for them to terminate.  (The SSH command runs the pilot script,
+which execs the master.)  When they're all done, it's safe to clean up the shared directory.
 
 While it's not necessary for the back-ends to share command-line arguments
 and semantics, it seems like it would make the front-end's job quite a bit
@@ -75,13 +76,45 @@ the common functions or functionality instead.)  It would be be responsibility
 of the front-end to transfer a machine-specific file for sourcing, if that's
 the implementation.
 
+Rationales
+----------
+
+- We use a job ad to store state because we were looking for stable storage of
+  a bag of attribute-value pairs, and that's what a job ad is.  Additionally,
+  using the job queue means that a tool for extracting a history of annex
+  requests already exists (`condor_history`).  Finally, we can use the job
+  to check for the presence of annex startds (and, of course, remember the
+  answer).
+- Annex requests have individual identities (the global job ID of the
+  corresponding local-universe job, above), and the corresponding startds
+  advertise it.  This could also be used for interface purpose (e.g., stop
+  the startds from this request), but currently isn't.
+- The `--annex-name` option to `htcondor job submit` sets `TargetAnnexName` in
+  the job ad, and a job transform on the schedd converts that into `FlockTo`
+  and a few other things.  The requirement looks overly complicated because
+  it's evaluated in the context of a machine ad that doesn't have
+  `AuthenticatedIdentity` set (by the startd, when it's double-checking the
+   match).
+- The non-annex-job transform is better stated as "not an `AuthenticatedIdentity`
+  from the annex".  It originally was written that way, but it was thought that
+  since the AP and CM need to share `TRUST_DOMAIN`s that it would be hard to
+  specify only annex users (since the domain would be the same); it therefore
+  made sense to assume the `condor` and `condor_pool` were the only admin-
+  approved identities.  It turns out that `TRUST_DOMAIN` sets the issuer, but
+  the subject comes from `UID_DOMAIN`, which need not be shared between the
+  AP and the CM.  (The OSG Connect APs, as it turns out, are all glide-in
+  only, and get their startds from `.*@flock.opensciencegrid.org`.)
+
 9.8.0 Design
 ============
+
+The code as deployed at the end of April, 2022, does not entirely
+conform to the original design.
 
 HTCondor Architecture
 ---------------------
 
-The 9.8.0 design was severely compromised by the discovery that
+The 9.8.0 HTCondor achitecture was compromised by the discovery that
 per-user flocking
   - only works for one user at a time
   - and flocks all of that user's jobs, not just the marked ones.
@@ -127,6 +160,9 @@ identical on all four machines.
 
 Further Refinements
 ===================
+
+There are a number of improvements that could be made without making
+fundamental changes to the design.
 
 HTCondor Architecture
 ---------------------
