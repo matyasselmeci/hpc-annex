@@ -175,7 +175,7 @@ delayed until we get that sorted out.
 Anticipated Future Design
 =========================
 
-This section will become part of the "phase 2" design doc.
+(This section will become part of the "phase 2" design doc.)
 
 ToddT anticipates having the startds report directly to the AP from which
 the annex was requested.  This should eliminate the need for someone to
