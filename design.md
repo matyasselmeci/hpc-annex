@@ -64,7 +64,7 @@ queues have very shallow depth/simultaneous jobs limits), we run a script that
 SSHs to each node in the job (including itself) and waits for the master to
 terminate.  When they're all done, it's safe to clean up the shared directory.
 
-    While it's not necessary for the back-ends to share command-line arguments
+While it's not necessary for the back-ends to share command-line arguments
 and semantics, it seems like it would make the front-end's job quite a bit
 easier, and so it is strongly encouraged; at a minimum, we really want error
 reporting and failure modes to be the same.  It would also be nice, if it's
