@@ -172,6 +172,10 @@ to be submitted.  However, we're in the middle of ongoing discussions
 for big UI/UX changes for Phase 2, so this work should probably be
 delayed until we get that sorted out.
 
+We should implement AP-managed (and shared FS -aware) sandboxes and
+eliminate the manual prestaging done by the HPC Annex tools.  This
+should make job/annex binding considerably simpler.
+
 Anticipated Future Design
 =========================
 
