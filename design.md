@@ -27,7 +27,7 @@ Software Architecture
 These HPC tools have one front-end (the UI) and a back-end script for
 each HPC machine we care about (Stampede 2, Anvil, Expanse, and Bridges 2);
 for convenience, each back-end script currently assumes that its corresponding
-pilot script exists, rather than write it out itself.
+pilot scripts exist, rather than write it out itself.
 
 Researchers do not interact with the back-end.  They request annexes
 via the front-end, whose interface will be consistent across back-ends and
