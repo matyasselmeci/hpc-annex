@@ -2,7 +2,7 @@
 
   - `gsissh stampede2 /usr/local/etc/taccinfo`
   - `gsissh expanse 'module load sdsc; expanse-client user'`
-  - `gsissh bridges2 /usr/local/etc/taccinfo`
+  - `gsissh bridges2 projects`
   - `gsissh anvil mybalance`
 
   #### Installing HPC Annex on OSG Connect (for the demo)
