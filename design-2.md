@@ -8,11 +8,45 @@ current state of the world.
 Problem
 -------
 
+We expect increasingly large numbers of researchers to have allocations for HPC
+machines and want to use those allocations for the HTC work.  This is
+non-trivial, since it basically involves running your own glide-in pool.  Phase
+1 of this project has made command-line tooling (and some infrastructure)
+available to researchers with access to the OS Pool Access Point.
+
+This project is not presently intended to address other "bring-your-own"
+resources, such as PATh HTC allocations, although we it will probably be
+worthwhile to consider that (and those) resource(s) when improving the UI.
+
 Goals
 -----
 
+These goals are posited as items for discussion.
+
+- Improve deployability, in the sense that we think that it should require
+  no more than turning a single meta-knob to enable users of an access point
+  to use the HPC Annex tools.
+- 
+
 Specifications
 --------------
+
+### Deployability
+
+We presently require a metaknob to be turned for the HPC Annex tooling to
+work for three reasons:
+
+1.  To implement a new job ad command (`TargetAnnexName`).  This was done
+    to reduce implementation overhead, as well as making it easier for,
+    say, DAGMan-submitted jobs to run on an annex.  This was implemented
+    as a job transform.
+2.  To make it impossible for jobs which don't have `TargetAnnexName` set
+    to run on an annex EP, even if that EP is misconfigured (and willing
+    run non-annex jobs).  This was also implemented as a job transform.
+3.  So that the tooling can complain if the necessary infrastructure for
+    making the tooling work doesn't exist.
+
+...
 
 Milestones
 ----------
