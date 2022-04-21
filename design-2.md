@@ -28,9 +28,6 @@ These goals are posited as items for discussion.
   to use the HPC Annex tools.
 - 
 
-Specifications
---------------
-
 ### Deployability
 
 We presently require a metaknob to be turned for the HPC Annex tooling to
@@ -46,7 +43,23 @@ work for three reasons:
 3.  So that the tooling can complain if the necessary infrastructure for
     making the tooling work doesn't exist.
 
-...
+Obviously, if we successfully eliminate the need for any additional
+infrastructure, point 3 becomes irrelevant.  The additional infrastructure
+is a collector; if we can leverage the (coming) ability of remote startds to
+report directly to schedds, we can eliminate the collector.  (See elsewhere
+in this document for details.)
+
+Specifications
+--------------
+
+### Switch to per-user flocking.
+
+Switch to per-user flocking eliminates the need for an external collector
+under the conditions below, which improves **deployability**.  <FIXME:
+other goals met by this specification?>
+
+<conditions include: security, condor_status'ability, the schedd only
+sending jobs set with `FlockTarget`, FIXME: etc?>
 
 Milestones
 ----------
