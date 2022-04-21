@@ -45,21 +45,45 @@ work for three reasons:
 
 Obviously, if we successfully eliminate the need for any additional
 infrastructure, point 3 becomes irrelevant.  The additional infrastructure
-is a collector; if we can leverage the (coming) ability of remote startds to
-report directly to schedds, we can eliminate the collector.  (See elsewhere
-in this document for details.)
+is a collector; if we can leverage the (coming) ability of remote EPs to
+report directly to APs, we can eliminate the collector.
+
+If jobs must each individually opt-in to run on user-supplied EPs, we
+don't need to provide for point 2 explicitly.
+
+We still want a job ad command which targets a specific annex.  However,
+assuming point 2, if a job must opt-in to running on user-supplied EPs,
+then opting in could also specify the specific annex.  (The current
+implementation of the transform also adds `AnnexName` to `JobMachineAttrs`,
+which we could either put in `SYSTEM_JOB_MACHINE_ATTRS` or do in the
+implementation of the opting-in command as a special case.)
+
+### ...
 
 Specifications
 --------------
 
-### Switch to per-user flocking.
+### Switch to directly-reporting EPs.
 
-Switch to per-user flocking eliminates the need for an external collector
-under the conditions below, which improves **deployability**.  <FIXME:
-other goals met by this specification?>
+If the Annex EPs directly reported to the researcher's AP, the
+HPC Annex tooling would no longer need its own central manager.
+This would improve **deployability**.  <FIXME: any other goals
+met by this specification?>
 
-<conditions include: security, condor_status'ability, the schedd only
-sending jobs set with `FlockTarget`, FIXME: etc?>
+This direct-reporting feature does not yet exist, although it
+is under active development.  The HPC Annex tooling would be
+able to use this feature under the following conditions:
+
+1.  That the AP issue user-specific IDTOKENS (via `condor_token_fetch`)
+    whose bearer can use them to directly report an EP to the AP.
+2.  That each job specifies if it's willing to run on such EPs, and if
+    so, which one(s).  This need not initially include the ability
+    to run one user's jobs on another user's EPs.  This requirement
+    may overlap with properly implementing per-user flocking,
+    depending on how we want to represent the directly-reporting EPs.
+3.  That the HPC Annex tooling have some mechanism very much like,
+    and ideally identical to, `condor_status` which works on EPs
+    directly reported to the local AP.
 
 Milestones
 ----------
