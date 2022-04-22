@@ -158,7 +158,7 @@ but the tooling presently uses the same word -- annex -- to refer to both.
 #### Begin Random Vocabulary Interjection
 
 ##### annex
-A named set of leased resources.
+A named set of resources leased to run HTCondor jobs.
 
 Note that the set is named, not self-identifying.  The implementaion may
 rely on EPs self-identifying in a cryptographically verifiable way, but
@@ -188,6 +188,11 @@ ran my jobs last week.  This same problem has caused us grief with jobs which
 are started more than once.  I don't know if that means we should adjust the definition
 to be time-dependent, or if we just need to decide on way of referring to yesterday's
 annex as opposed to last weeks annex ahead of time and stick with it.
+
+I added the purpose -- "to run HTCondor jobs" -- to the definition because
+it makes the specfic value the tooling is adding clearer.  (This came up
+in the context of trying to use the previous definition in the context of,
+say, the third or fourth slide of a talk.)
 
 ##### resource request
 By definition, the resources in an annex have already been leased.  How
