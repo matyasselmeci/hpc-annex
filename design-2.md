@@ -43,6 +43,8 @@ These goals are posited as items for discussion.
     a particular annex?
   - Small, focused improvements to the wording, especially in using
     a consistent vocabulary within and between different commands.
+  - Do we want to support one researcher allowing another (user) to
+    run on their annexes?
 - Support file-transfer efficiency for more (types of) jobs.  Right now,
   the tooling only pre-stages `.sif` files from container universe jobs,
   and implicitly assumes that any usefully-shareable input files have
@@ -115,7 +117,9 @@ then opting in could also specify the specific annex.
 
 #### Making it easy to specify that all nodes in a DAG should run on a particular annex.
 
-...
+This is very similar to, or perhaps entailed, by the above, but could be distinct,
+if, for instance, the researcher wanted to run multiple DAGs sequentially (on the
+same annex).
 
 ### AP-managed Sandboxes
 
