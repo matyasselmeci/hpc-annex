@@ -194,6 +194,10 @@ it makes the specfic value the tooling is adding clearer.  (This came up
 in the context of trying to use the previous definition in the context of,
 say, the third or fourth slide of a talk.)
 
+(We could define an unqualified annex as "... to run jobs" and make an "HTCondor
+annex" an annex which ran HTCondor jobs, but that's probably more subtle than
+we need to be; we're not writing a paper, here.)
+
 ##### resource request
 By definition, the resources in an annex have already been leased.  How
 does one obtain a lease to a resource?  By asking for it; such a question
