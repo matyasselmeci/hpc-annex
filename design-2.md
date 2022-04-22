@@ -127,7 +127,26 @@ in the definition.  I'm not sure if this is imprecise thinking, or a useful
 if minorly deceptive allusion to BYOR.
 
 I used "resources" here because (a) "BYOR" and (b) we may not be leasing
-whole nodes (see below).
+whole nodes (see below).  Amplifying on (a), another possibility would be
+to say "EPs", but I think "leased EP" is potentially confusing (do we mean
+the running daemon is leased, or the resources it's making available to jobs?)
+and maybe unnecessarily jargony.
+
+I like "leased" in this definition because it carries three important connotations:
+1.  A lease is temporary.
+2.  You don't own what you lease; you have restricted rights and privileges with it.
+3.  Leases aren't free (even if you're just with your allocation).
+
+Having a name is critical.
+
+An important caveat here is that this definition is both time- and set-membership-
+independent.  Resources could come or go at any time, but that doesn't change the
+identity of the annex.  Likewise, this definition doesn't permit us to distinguish
+between the "example" annex that ran my jobs last week from the "example" anne that
+ran my jobs last week.  This same problem has caused us grief with jobs which
+are started more than once.  I don't know if that means we should adjust the definition
+to be time-dependent, or if we just need to decide on way of referring to yesterday's
+annex as opposed to last weeks annex ahead of time and stick with it.
 
 ##### resource request
 By definition, the resources in an annex have already been leased.  How
