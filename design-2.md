@@ -25,7 +25,8 @@ These goals are posited as items for discussion.
 
 - Improve deployability, in the sense that we think that it should require
   no more than turning a single meta-knob to enable users of an access point
-  to use the HPC Annex tools.
+  to use the HPC Annex tools, and ideally not even that.  (Specifically,
+  we don't want the admin to have to issue tokens or run another CM.)
 - Improve the direct usability of the tooling.  This potentially includes:
   - Checking resource requests for correctness before sending them to the
     back-end script.  Much of this information is already encoded in the
@@ -36,6 +37,7 @@ These goals are posited as items for discussion.
     command-line flags) to change them.  This includes the size of the
     annex and its duration and idle times, for instance.
   - Providing a tool to mark and unmark jobs as requiring an annex.
+  - Allow the user to start an annex without any jobs?
   - Providing a tool for use as a DAGMan provisioning node.
   - Making it easy to specify that all nodes in a DAG should run on
     a particular annex?
@@ -83,7 +85,42 @@ then opting in could also specify the specific annex.
 
 ### Usability Improvements
 
+#### Providing a tool to mark and unmark jobs as requiring an annex.
+
+- Support adding jobs to an annex after its creation.
+  - Running `htcondor job submit --annex-name` will only work right now
+    (for container-universe jobs) if:
+    - the container image was already staged to the annex, and
+    - `container_image` is a basename.
+    This is because of limitations in the hand-rigged `.sif` file-sharing
+    implementation.  Neither restriction would apply if we had AP-managed
+    sandboxes.  However, if that takes too long to arrive, we could write
+    a script to copy the `.sif` files to the right place (which would require
+    the user to log-in again).
+- Support removing jobs from an annex after their submission.
+  - In the present implementation, this implies undoing a job transformation.
+    As far as I know, there's no general way to do this, although we might
+    be able to used `qedit` to do this specific change.  This implies that
+    we'd rather _not_ implement `TargetAnnexName` as a job transform, so that
+    we can simply remove it as requested.
+
+#### Support creating an annex before submitting the corresponding jobs.
+- This won't work right now because we can't presently prestage files
+    on the annex after its creation without making the user log in again.
+- This problem goes away if the AP takes care of prestaging for us.
+
+#### Providing a tool for use as a DAGMan provisioning node.
+
 ...
+
+#### Making it easy to specify that all nodes in a DAG should run on a particular annex.
+
+...
+
+### AP-managed Sandboxes
+
+See some other design document.  Not needing to transfer `.sif` or other
+files after submitting the pilot jobs would dramatically simplify things.
 
 ### Conceptual Improvements
 
@@ -179,7 +216,7 @@ However, such a restriction would prevent a few scenarios which seem likely:
 - The researcher has placed a number of jobs for a particular annex, but
   they're runnning more slowly than anticipated.  We could provide a tool
   to create a new, larger annex and rewrite all placed jobs to target the
-  new annex, but that's technilogically challenging (because of job factories
+  new annex, but that's technologically challenging (because of job factories
   and DAGMan) and may result in substantial delays (because who knows when the
   new, larger set of resources may become available).  It may be "more natural"
   to allow the researcher to add more resources with the same name, instead.
@@ -198,21 +235,18 @@ However, such a restriction would prevent a few scenarios which seem likely:
   stare.  Even with restricted tooling, this means we'd still want to distinguish
   between yesterday's "example" annex and last week's "example" annex.
 - It may be useful and/or good UI/UX to remember the name of a set of details
-  permanently, or at least for a lot longer than we do individual "annex instance."
-
-### AP-managed Sandboxes
-
-See some other design document.  Not needing to transfer `.sif` or other
-files after submitting the pilot jobs would dramatically simplify things.
-
-### 
-
-...
+  permanently, or at least for a lot longer than we do an `individual "annex instance."
+  This of course leads to the question of what to call those sets ("annex template"s?)
+  and how to/how the researcher can manage them.  Along the "don't repeat yourself"
+  line, perhaps the tooling should remember the details from the last command-line
+  creation of an instance and use those if none are specified?  Does this integrate
+  cleanly into the idea of user-managed/explicit templates?  Does, or how does,
+  this idea integrate with copying/cloning, above?
 
 Specifications
 --------------
 
-### Switch to directly-reporting EPs.
+### (Deployability)  Switch to directly-reporting EPs.
 
 If the Annex EPs directly reported to the researcher's AP, the
 HPC Annex tooling would no longer need its own central manager.
@@ -237,7 +271,7 @@ able to use this feature under the following conditions:
     and ideally identical to, `condor_status` which works on EPs
     directly reported to the local AP.
 
-### ...
+### Usability
 
 ...
 
@@ -253,21 +287,6 @@ Milestones
 BITS FOR DRAFTING
 =================
 
-- Right now, `htcondor annex create` is used to both create annexes and expand
-  them.  This is, at best, confusing.  We should certainly add something like
-  `htcondor annex expand` (even if it’s just an alias); it’s not clear if we
-  should also require users to specify expand rather than create if there’s
-  already an annex by that name (as recorded in the local universe job queue).
-- Support adding jobs to an annex after its creation.
-  - Running `htcondor job submit --annex-name` will only work right now
-    (for container-universe jobs) if:
-    - the container image was already staged to the annex, and
-    - `container_image` is a basename.
-    This is because of limitations in the hand-rigged `.sif` file-sharing
-    implementation.  Neither restriction would apply if we had AP-managed
-    sandboxes.  However, if that takes too long to arrive, we could write
-    a script to copy the `.sif` files to the right place (which would require
-    the user to log-in again).
 - Add a tool that targets jobs to annex after their submission.  Presently,
   this would make them run _only_ on that annex.  This is currently required
   at a technical level because of the container image restrictions mentioned
