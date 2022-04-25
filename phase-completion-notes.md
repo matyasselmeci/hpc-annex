@@ -10,14 +10,13 @@ In particular:
 Required changes before the release:
 - [x]  (HTCONDOR-1025)  Modify `htcondor job submit --annex-name` to use job transform.
 - [x]  (HTCONDOR-1033)  2022-03-25 demo feedback.  (ToddM)  Parts will become other tickets, some in
-       phase 2).  In code review.
+       phase 2).
 - [x]  (HTCONDOR-1020)  Fetch a new token on every annex creation;
        in progress.  (ToddM)  Will need to add the "step X of Y" treatment
        to the Bridges 2 back-end on merge.
 - [x]  (HTCONDOR-983)   The Bridges 2 back-end; in code review.  (ToddM)         
-- [ ]  We need to add the HPC annex CM as an old-school flock target on login*.osgconnect.net;
-       per-user flocking is broken for multiple users (flocking to the same CM).  We may need
-       to disable per-user flocking in the job transform (but hopefully not).
+- [x]  We need to add the HPC annex CM as an old-school flock target on login*.osgconnect.net;
+       per-user flocking is broken for multiple users (flocking to the same CM).
 - [ ]  (HTCONDOR-958)   Documentation and code review.
 
 Good ideas:
