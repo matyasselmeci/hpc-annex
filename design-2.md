@@ -129,7 +129,7 @@ This is very similar to, or perhaps entailed, by the above, but could be distinc
 if, for instance, the researcher wanted to run multiple DAGs sequentially (on the
 same annex).
 
-### AP-managed Sandboxes
+### File-Transfer Efficiency (AP-managed Sandboxes)
 
 See some other design document.  Not needing to transfer `.sif` or other
 files after submitting the pilot jobs would dramatically simplify things.
@@ -281,8 +281,7 @@ configuring pools to pull resource requests.
 
 If the Annex EPs directly reported to the researcher's AP, the
 HPC Annex tooling would no longer need its own central manager.
-This would improve **deployability**.  <FIXME: any other goals
-met by this specification?>
+This would improve **deployability**.
 
 This direct-reporting feature does not yet exist, although it
 is under active development.  The HPC Annex tooling would be
@@ -301,8 +300,24 @@ able to use this feature under the following conditions:
 3.  That the HPC Annex tooling have some mechanism very much like,
     and ideally identical to, `condor_status` which works on EPs
     directly reported to the local AP.
+4.  That mechanism support transferring the remote-administration
+    capability to the researcher['s tools].
+5.  The jobs run on the directly-reporting EPs do not count against the
+    the job owner's priority.
 
-### Usability
+### Usability Improvements
+
+...
+
+### (File-Transfer Efficiency)  Implement AP-Managed Sandboxes
+
+...
+
+### Reconceptualization
+
+...
+
+### Pull-Based Model
 
 ...
 
@@ -310,15 +325,12 @@ able to use this feature under the following conditions:
 
 ### Milestone 1
 
+...
+
 ### Milestone 2
+
+...
 
 ### Milestone 3
 
-# BITS FOR DRAFTING
-
-- Look into supporting "noun" plug-ins in `htcondor`.  This may be a (partial)
-  solution to the documentation problem, but `htcondor gromacs ...` also
-  sounds really attractive to GregT.
-- Add `hpc_annex_lifetime` to the startds for `annex status`'s convenience
-  (so that we can always say how long the annex has left, even if the local
-  universe job was removed or submitted on a different machine)?
+...
