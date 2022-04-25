@@ -192,36 +192,13 @@ Software Architecture
 - The back-end scripts
   - should arrange for EXECUTE to be on local disk.
   - should be refactored (see above).
-  - should pull/answer resource requests in the HPC Annex collector,
-    rather than depend on that information being embedded in the
-    command-line.  This may simplify the back-end (yay!), but more
-    importantly, serve the strategic purpose of establish a convention
-    useful for moving glide-ins/pilots to a pull model.
+- The pilot should advertise `hpc_annex_lifetime` for the convenience
+  of the front-end tools, and so that if the corresponding state job
+  is removed or was submitted on another schedd, the tool(s) can still
+  report on expected duration(s).
 - Improve the implementation of the job transforms in the metaknob.
   - `ANNEX_TOKEN_DOMAIN = $(2:$(ANNEX_COLLECTOR))`
   - Replace the expression in the second (optional) transform with
     another defaulted variable so that it can be tweaked more easily.
 
-We will need to allow more flexibility in binding and unbinding jobs
-and annexes, and obviously allow multiple jobs (perhaps only jobsets?)
-to be submitted.  However, we're in the middle of ongoing discussions
-for big UI/UX changes for Phase 2, so this work should probably be
-delayed until we get that sorted out.
-
-We should implement AP-managed (and shared FS -aware) sandboxes and
-eliminate the manual prestaging done by the HPC Annex tools.  This
-should make job/annex binding considerably simpler.
-
-Anticipated Future Design
-=========================
-
-(This section will become part of the "phase 2" design doc.)
-
-ToddT anticipates having the startds report directly to the AP from which
-the annex was requested.  This should eliminate the need for someone to
-maintain an annex CM, but it's not clear that simply querying the schedd
-for the startd as if it were a collector will work.  Likewise, the
-implications for control over which jobs go where are unclear, are as the
-effects of such startds on a user's priority (or priority-equivalent,
-depending on how the AP schedules).  Likewise, it's unclear if the method
-proposed for remote administration above would work.
+Other proposals have been moved to the "phase 2" design doc.
