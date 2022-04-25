@@ -1,12 +1,10 @@
-HPC Annex "Phase 2"
-===================
+# HPC Annex "Phase 2"
 April 21, 2022
 
 See [design.md](design.md) for the originally-intended design and the
 current state of the world.
 
-Problem
--------
+## Problem
 
 We expect increasingly large numbers of researchers to have allocations for HPC
 machines and want to use those allocations for the HTC work.  This is
@@ -18,8 +16,7 @@ This project is not presently intended to address other "bring-your-own"
 resources, such as PATh HTC allocations, although we it will probably be
 worthwhile to consider that (and those) resource(s) when improving the UI.
 
-Goals
------
+## Goals
 
 These goals are posited as items for discussion.
 
@@ -31,20 +28,24 @@ These goals are posited as items for discussion.
   - Checking resource requests for correctness before sending them to the
     back-end script.  Much of this information is already encoded in the
     scripts but not actually used; it may also be better-represented in
-    an external configuration file.
+    an external configuration file.  This specifically does _not_ include,
+    until otherwise specified, converting between node units and CPUs/memory
+    units.
   - Report to the user (before prompting them to log in) the various
     attributes about the resource request they're making and how (which
     command-line flags) to change them.  This includes the size of the
     annex and its duration and idle times, for instance.
   - Providing a tool to mark and unmark jobs as requiring an annex.
-  - Allow the user to start an annex without any jobs?
+  - Allow the user to start an annex without any jobs.
   - Providing a tool for use as a DAGMan provisioning node.
   - Making it easy to specify that all nodes in a DAG should run on
-    a particular annex?
+    a particular annex.
   - Small, focused improvements to the wording, especially in using
     a consistent vocabulary within and between different commands.
-  - Do we want to support one researcher allowing another (user) to
-    run on their annexes?
+  - Allow researchers to share their annexes.
+  - Allow researchers to specify that their annexes are allowed to run
+    jobs that aren't annex-specific.
+  - Implement `htcondor jobset submit --annex-name`.
 - Support file-transfer efficiency for more (types of) jobs.  Right now,
   the tooling only pre-stages `.sif` files from container universe jobs,
   and implicitly assumes that any usefully-shareable input files have
@@ -57,6 +58,8 @@ These goals are posited as items for discussion.
   but almost completely different implementation.  However, it has become
   clear that we need a strong and well-decribed conceptual basis in
   order to provide a good user interface and experience.
+- Start down the road towards switching from job-oriented push-based
+  glide-ins towards pool-oriented pull-based glide-ins.
 
 ### Deployability
 
@@ -105,6 +108,11 @@ then opting in could also specify the specific annex.
     be able to used `qedit` to do this specific change.  This implies that
     we'd rather _not_ implement `TargetAnnexName` as a job transform, so that
     we can simply remove it as requested.
+  - ChristinaK thinks that many users may just instinctively remove and
+    resubmit jobs targeting the wrong annex.  Also, if we intend to make
+    targeting a specific annex optional in the near future, this may be
+    largely wasted work.  (If you _want_ a job only to run on a specific
+    annex and change your mind, I guess such a tool would be useful.)
 
 #### Support creating an annex before submitting the corresponding jobs.
 - This won't work right now because we can't presently prestage files
@@ -256,8 +264,18 @@ However, such a restriction would prevent a few scenarios which seem likely:
   cleanly into the idea of user-managed/explicit templates?  Does, or how does,
   this idea integrate with copying/cloning, above?
 
-Specifications
---------------
+### Towards a Pull-based Model
+
+An annex, conceptually, is a push-based model: the researcher decides that now is a
+good time to make a resource request.  Presently, the implementation is also
+push-based: for each resource request, all of the necessary details are sent
+along in the submitted SLURM job.  We could, instead, only send along enough details
+to contact the annex collector and ask _it_ for the details (of a given resource
+request).  This has no immediate benefit for the annex, but a working example of such
+a system would make it easier to switch from glideInWMS pushing jobs to administrators
+configuring pools to pull resource requests.
+
+## Specifications
 
 ### (Deployability)  Switch to directly-reporting EPs.
 
@@ -288,8 +306,7 @@ able to use this feature under the following conditions:
 
 ...
 
-Milestones
-----------
+## Milestones
 
 ### Milestone 1
 
@@ -297,45 +314,11 @@ Milestones
 
 ### Milestone 3
 
-BITS FOR DRAFTING
-=================
+# BITS FOR DRAFTING
 
-- Add a tool that targets jobs to annex after their submission.  Presently,
-  this would make them run _only_ on that annex.  This is currently required
-  at a technical level because of the container image restrictions mentioned
-  above, and because the annex attempts to prevent random jobs from the same
-  user from running on them.  The latter is a UI/UX choice that could be
-  revisited, especially if the job could otherwise run unmodified elsewhere
-  (once the container image restrictions are lifted).
-- Allow annex creation before job submission (for DAGMan).  Again, this
-  requires removing the current restrictions on container images.
-- If we still need to rewrite jobs, mark them so we don't rewrite them again.
-- Implement `htcondor jobset submit annex-name`.  We're going to need it.
-- Pull resource requests from the annex collector rather than push them to
-  the pilot via command-line arguments, mostly for strategic reasons.
-- For now, barring requests from our UI/UX people and/or the users, the
-  front-end will know if a given queue works with whole nodes or allocates
-  individual cores (or chunks of RAM) and require the user to specify the
-  size appropriately.
 - Look into supporting "noun" plug-ins in `htcondor`.  This may be a (partial)
   solution to the documentation problem, but `htcondor gromacs ...` also
   sounds really attractive to GregT.
-- Some command, currently unnamed, to unbind a job from an annex.  It’s not
-  clear if this is really worth it – ChristinaK thinks that many users may
-  just instinctively remove and resubmit jobs targeting the wrong annex.  Also,
-  we intend to make targeting a specific annex optional in the near future, so
-  this may be largely wasted work.  (If you _want_ a job only to run on a
-  specific annex and change your mind, I guess such a tool would be useful.)
-- Should `htcondor annex create` not have "mandatory options" (named
-  arguments)?  This was done without much thought, but since all of the
-  machine names are also valid annex names, it seems like maybe
-  purely postional arguments aren't the right thing either.  Another argument
-  in favor would be if we were being careful to be consistent/orthogonal
-  across all our commands...
 - Add `hpc_annex_lifetime` to the startds for `annex status`'s convenience
   (so that we can always say how long the annex has left, even if the local
   universe job was removed or submitted on a different machine)?
-- Improve the job transforms in the metaknob.
-  - `ANNEX_TOKEN_DOMAIN = $(2:$(ANNEX_COLLECTOR))
-  - Replace the expression in the second (optional) transform with another
-    defaulted variable so that it can be tweaked more easily.
