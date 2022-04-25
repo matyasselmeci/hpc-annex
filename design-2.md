@@ -42,10 +42,17 @@ These goals are posited as items for discussion.
     a particular annex.
   - Small, focused improvements to the wording, especially in using
     a consistent vocabulary within and between different commands.
+    -  This includes "breadcrumbs" as/or suggested next steps.
   - Allow researchers to share their annexes.
   - Allow researchers to specify that their annexes are allowed to run
     jobs that aren't annex-specific.
   - Implement `htcondor jobset submit --annex-name`.
+  - Remembering various command-line options from run to run.  This
+    ties into reporting which values are being used for each run,
+    and may tie into the reconceptualization point, below.  For instance,
+    and perhaps as a special exception, it may be appropriate to remember
+    which project(s) the researcher has used for which queues and/or
+    HPC systems.
 - Support file-transfer efficiency for more (types of) jobs.  Right now,
   the tooling only pre-stages `.sif` files from container universe jobs,
   and implicitly assumes that any usefully-shareable input files have
