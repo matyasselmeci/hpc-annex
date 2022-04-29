@@ -200,8 +200,10 @@ Software Architecture
   [] `ANNEX_TOKEN_DOMAIN = $(2:$(ANNEX_COLLECTOR))`
   [] Replace the expression in the second (optional) transform with
     another defaulted variable so that it can be tweaked more easily.
-- The "well-known" location for the configuration tarball should be
+[] The "well-known" location for the configuration tarball should be
   passed to the back-end scripts from configuration.  (As should the
   "well-known" location for the binary tarballs?)
+[] Print out progress during `htcondor annex shutdown` (re: hang if
+   shared port not enabled for unprivileged tools).
 
 Other proposals have been moved to the "phase 2" design doc.
