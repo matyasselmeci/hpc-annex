@@ -1,5 +1,3 @@
-Why is this page rendering hard line breaks all of a sudden?  Is this just github being broken?
-
 So I was listening to a meeting and had a Miron moment, where I heard the same
 word used like a dozen times in two minutes and just really wanted to tell
 everyone to stop using that word.  The meeting had turned to discussing how to
