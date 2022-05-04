@@ -37,6 +37,6 @@ useful/informative/instructive by itself, in the same set of ways that a
 file-transfer infrastructure hash would be.
 
 So: instead of explicitly naming a concept we have trouble defining, why
-not start smaller and for a particular problem domain, and do compute
+not start smaller and for a particular problem domain, and compute
 membership based on observed properties of the system rather than
 desired ones?
