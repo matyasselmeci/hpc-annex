@@ -12,7 +12,7 @@ what characterizes them as an execution point.  So the idea is that we get
 somebody who knows what matters about Ceph, or about CVMFS, or about the
 proxy setting(s), etc, to write a script that spits this all out so that we
 can just _know_ the file-transfer infrastructure, not just infer it from
-mystical "site" concept.  We can do even better.
+this mystical "site" concept.  We can do even better.
 
 Suppose in addition to (or instead of?) advertising the file-transfer
 infrastructure script output, we actually hash it?  Then it becomes
