@@ -76,3 +76,15 @@ AUTH_SSL_CLIENT_CAFILE = /etc/ssl/certs/ca-certificates.crt
 FLOCK_TO = htcondor-cm-hpcannex.osgdev.chtc.io
 MIN_FLOCK_LEVEL = 1
 ```
+
+#### Current CM Extra Configuration
+
+(99-zzz.config)
+```TRUST_DOMAIN = flock.opensciencegrid.org
+TRUSTED_DOMAIN = services.ci-connect.net
+
+ALLOW_ADVERTISE_STARTD = *@$(TRUSTED_DOMAIN)
+ALLOW_ADVERTISE_SCHEDD = *@$(TRUSTED_DOMAIN)
+
+NEGOTIATOR_DEBUG = D_FULLDEBUG
+```
