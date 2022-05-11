@@ -3,8 +3,20 @@
 #### How to configure a personal condor to use the OS pool CM
 
 1. Obtain a copy of `hpcannex-key`.
-2. Copy it to `$(LOCAL_DIR)/passwords`.
-3. Set the following configuration: ```
+2. Copy it to `$(LOCAL_DIR)/passwords.d`.
+3. Obtain a token for your schedd by running the following on the CM:
+```
+condor_token_create \
+  -identity <my-schedd>@services.ci-connect.net \
+  -key hpcannex-key \
+  -authz READ \
+  -authz ADVERTISE_MASTER \
+  -authz ADVERTISE_SCHEDD \
+  > <my-schedd>@services.ci-connect.net
+```
+4. Copy if to `$(LOCAL_DIR)/tokens.d`.
+5. Set the following configuration:
+```
 # I should not have to set this.
 SEC_PASSWORD_DIRECTORY = $(LOCAL_DIR)/passwords.d
 # Or this...
