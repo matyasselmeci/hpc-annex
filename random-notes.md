@@ -1,11 +1,60 @@
-  #### How to determine your PROJECT at various machines
+### Current Information
+
+#### How to configure a personal condor to use the OS pool CM
+
+1. Obtain a copy of `hpcannex-key`.
+2. Copy it to `$(LOCAL_DIR)/passwords`.
+3. Set the following configuration: ```
+# I should not have to set this.
+SEC_PASSWORD_DIRECTORY = $(LOCAL_DIR)/passwords.d
+# Or this...
+SEC_TOKEN_SYSTEM_DIRECTORY = $(LOCAL_DIR)/tokens.d
+# ... and this is just wrong, but has to be done, because
+# the above is actually completely ignored in a personal
+# condor.
+SEC_TOKEN_DIRECTORY = $(SEC_TOKEN_SYSTEM_DIRECTORY)
+
+# Allow FS to work for `condor_off`, et alia.
+ALLOW_ADMINISTRATOR = $(ALLOW_ADMINISTRATOR) <your-user-name>@$(UID_DOMAIN)
+
+# Allow condor_token_fetch -key to work with the hpcannex-key.
+SEC_TOKEN_FETCH_ALLOWED_SIGNING_KEYS = POOL hpcannex-key
+
+# Turn on htcondor annex.
+use feature:AssignAnnex(htcondor-cm-hpcannex.osgdev.chtc.io,$(TRUST_DOMAIN))
+
+# These knobs must be set precisely this way.  The first is
+# mostly (only?) just to set the issuer of the requested tokens.
+# The second is just to set the domain in the identity of the
+# issued token.  The third is to set the domain of the
+# AuthenticatedIdentity used to find annex machine ads.
+TRUST_DOMAIN = flock.opensciencegrid.org
+UID_DOMAIN = services.ci-connect.net
+ANNEX_TOKEN_DOMAIN = $(UID_DOMAIN)
+```
+
+#### How to determine your PROJECT at various machines
 
   - `gsissh stampede2 /usr/local/etc/taccinfo`
   - `gsissh expanse 'module load sdsc; expanse-client user'`
   - `gsissh bridges2 projects`
   - `gsissh anvil mybalance`
 
-  #### Installing HPC Annex on OSG Connect (for the demo)
+#### Current CM Extra Configuration
+
+(99-zzz.config)
+```TRUST_DOMAIN = flock.opensciencegrid.org
+TRUSTED_DOMAIN = services.ci-connect.net
+
+ALLOW_ADVERTISE_STARTD = *@$(TRUSTED_DOMAIN)
+ALLOW_ADVERTISE_SCHEDD = *@$(TRUSTED_DOMAIN)
+
+NEGOTIATOR_DEBUG = D_FULLDEBUG
+```
+
+### Historical Information
+
+#### Installing HPC Annex on OSG Connect (for the demo)
 
   - `git clone https://github.com/htcondor/htcondor.git`
   - (check out the appropriate branch)
@@ -32,7 +81,7 @@ TRUST_DOMAIN = azaphrael.org
 # Allow any pilot to whom we've given a token to advertise.
 ALLOW_ADVERTISE_STARTD = *@$(TRUST_DOMAIN)
 # Allow any user to whom we've given a token to flock.
-ALLOW_ADVERTISE_SCHEDD = *@$(TRUST_DOMAIN)
+ALLOW_ADVERTISE_SCHEDD = *@$(TRUST_DOMAIN)a config knob
 # Allow ourselves and the pilots to advertise masters.
 ALLOW_ADVERTISE_MASTER = $(ALLOW_ADVERTISE_STARTD) $(ALLOW_ADMINISTRATOR)
 
@@ -75,16 +124,4 @@ AUTH_SSL_CLIENT_CAFILE = /etc/ssl/certs/ca-certificates.crt
 # MIN_FLOCK_LEVEL is, in practice, required.
 FLOCK_TO = htcondor-cm-hpcannex.osgdev.chtc.io
 MIN_FLOCK_LEVEL = 1
-```
-
-#### Current CM Extra Configuration
-
-(99-zzz.config)
-```TRUST_DOMAIN = flock.opensciencegrid.org
-TRUSTED_DOMAIN = services.ci-connect.net
-
-ALLOW_ADVERTISE_STARTD = *@$(TRUSTED_DOMAIN)
-ALLOW_ADVERTISE_SCHEDD = *@$(TRUSTED_DOMAIN)
-
-NEGOTIATOR_DEBUG = D_FULLDEBUG
 ```
