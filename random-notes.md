@@ -55,7 +55,8 @@ ANNEX_TOKEN_DOMAIN = $(UID_DOMAIN)
 #### Current CM Extra Configuration
 
 (99-zzz.config)
-```TRUST_DOMAIN = flock.opensciencegrid.org
+```
+TRUST_DOMAIN = flock.opensciencegrid.org
 TRUSTED_DOMAIN = services.ci-connect.net
 
 ALLOW_ADVERTISE_STARTD = *@$(TRUSTED_DOMAIN)
