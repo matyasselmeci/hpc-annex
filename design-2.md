@@ -31,7 +31,7 @@ These goals are posited as items for discussion.
     an external configuration file.  This specifically does _not_ include,
     until otherwise specified, converting between node units and CPUs/memory
     units.
-  - Report to the user (before prompting them to log in) the various
+  - (HTCONDOR-1058)  Report to the user (before prompting them to log in) the various
     attributes about the resource request they're making and how (which
     command-line flags) to change them.  This includes the size of the
     annex and its duration and idle times, for instance.
