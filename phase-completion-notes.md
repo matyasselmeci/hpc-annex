@@ -27,19 +27,22 @@ Good ideas:
 Phase 1.5
 ---------
 
+- [ ]  Improve the job transforms in the metakob:
+```
+  * `ANNEX_TOKEN_DOMAIN = $(2:$(ANNEX_COLLECTOR))
+  * Replace the expression in the second (optional) transform with another
+    defaulted variable so that it can be tweaked more easily.
+```
+- [ ]  Add `hpc_annex_lifetime` to the startds for `annex status`'s convenience
+       (so that we can always say how long the annex has left, even if the local
+       universe job was removed or submitted on a different machine)?
 - [ ]  (HTCONDOR-1088)  EXECUTE should be on local disk.
 - [ ]  (HTCONDOR-1089)  Refactor back-end scripts.  All of the machines so far share identical
        `.pilot` and `.multi-pilot` scripts, so we should just condense them.
        The `.sh` scripts are all very similar; it should be possible to make
        one script and have it source in machine-specific overrides (function
        redefinitions) as necessary, or something.
-- [ ] Improve the job transforms in the metaknob.
-  - `ANNEX_TOKEN_DOMAIN = $(2:$(ANNEX_COLLECTOR))
-  - Replace the expression in the second (optional) transform with another
-    defaulted variable so that it can be tweaked more easily.
-- [ ] Add `hpc_annex_lifetime` to the startds for `annex status`'s convenience
-  (so that we can always say how long the annex has left, even if the local
-  universe job was removed or submitted on a different machine)?
+
 
 Phase 2+
 --------
