@@ -24,29 +24,39 @@ Good ideas:
        is set and politely refuse to do anything if not.  Done for `htcondor job submit --annex-name`
        in HTCONDOR-1025.  (JasonP)
 
+Phase 1.5
+---------
+
+- [ ]  (HTCONDOR-1088)  EXECUTE should be on local disk.
+- [ ]  (HTCONDOR-1089)  Refactor back-end scripts.  All of the machines so far share identical
+       `.pilot` and `.multi-pilot` scripts, so we should just condense them.
+       The `.sh` scripts are all very similar; it should be possible to make
+       one script and have it source in machine-specific overrides (function
+       redefinitions) as necessary, or something.
+- [ ] Improve the job transforms in the metaknob.
+  - `ANNEX_TOKEN_DOMAIN = $(2:$(ANNEX_COLLECTOR))
+  - Replace the expression in the second (optional) transform with another
+    defaulted variable so that it can be tweaked more easily.
+- [ ] Add `hpc_annex_lifetime` to the startds for `annex status`'s convenience
+  (so that we can always say how long the annex has left, even if the local
+  universe job was removed or submitted on a different machine)?
+
 Phase 2+
 --------
 
 - [ ]  Write a retro design doc for Phase 1.
 - [ ]  Write a proto design doc for Phase 2. ;)
-- [ ]  Finish debugging Anvil back-end.
-- [ ]  Frontera back-end.
-- [ ]  EXECUTE should be on local disk.
-- [ ]  Refactor back-end scripts.  All of the machines so far share identical
-       `.pilot` and `.multi-pilot` scripts, so we should just condense them.
-       The `.sh` scripts are all very similar; it should be possible to make
-       one script and have it source in machine-specific overrides (function
-       redefinitions) as necessary, or something.
+- [x]  Finish debugging Anvil back-end.
+- [ ]  Frontera back-end.  (Blocked on BrianB for access.)
 - `htcondor annex create` needs to know about the various queue restrictions
   and enforce them itself, so it doesn't make the user login only to get
   bounced back right away for an invalid request.  Some of this information
   has already been encoded, but none if it is currently being use, and it
-  should probably be read from a config file   (of some sort) instead. 
-- Right now, `htcondor annex create` is used to both create annexes and expand
-  them.  This is, at best, confusing.  We should certainly add something like
-  `htcondor annex expand` (even if it’s just an alias); it’s not clear if we
-  should also require users to specify expand rather than create if there’s
-  already an annex by that name (as recorded in the local universe job queue).
+  should probably be read from a config file   (of some sort) instead.
+- For now, barring requests from our UI/UX people and/or the users, the
+  front-end will know if a given queue works with whole nodes or allocates
+  individual cores (or chunks of RAM) and require the user to specify the
+  size appropriately.
 - Support adding jobs to an annex after its creation.
   - Running `htcondor job submit --annex-name` will only work right now
     (for container-universe jobs) if:
@@ -72,10 +82,6 @@ Phase 2+
 - Implement `htcondor jobset submit annex-name`.  We're going to need it.
 - Pull resource requests from the annex collector rather than push them to
   the pilot via command-line arguments, mostly for strategic reasons.
-- For now, barring requests from our UI/UX people and/or the users, the
-  front-end will know if a given queue works with whole nodes or allocates
-  individual cores (or chunks of RAM) and require the user to specify the
-  size appropriately.
 - Look into supporting "noun" plug-ins in `htcondor`.  This may be a (partial)
   solution to the documentation problem, but `htcondor gromacs ...` also
   sounds really attractive to GregT.
@@ -85,16 +91,24 @@ Phase 2+
   we intend to make targeting a specific annex optional in the near future, so
   this may be largely wasted work.  (If you _want_ a job only to run on a
   specific annex and change your mind, I guess such a tool would be useful.)
-- Should `htcondor annex create` not have "mandatory options" (named
-  arguments)?  This was done without much thought, but since all of the
-  machine names are also valid annex names, it seems like maybe
-  purely postional arguments aren't the right thing either.  Another argument
-  in favor would be if we were being careful to be consistent/orthogonal
+
+Superceded
+----------
+
+- Miron has decreed (for now) that `create` and `add` are separate verbs.  We may
+  radically change what those two verbs do, depending on what we end up deciding
+  about the "annex template" issue.
+  - Right now, `htcondor annex create` is used to both create annexes and expand
+    them.  This is, at best, confusing.  We should certainly add something like
+    `htcondor annex expand` (even if it’s just an alias); it’s not clear if we
+    should also require users to specify expand rather than create if there’s
+    already an annex by that name (as recorded in the local universe job queue).
+
+- Miron decreed that `htcondor annex create` would have two positional arguments
+  (and may decree a third for the project ID?). 
+  - Should `htcondor annex create` not have "mandatory options" (named
+    arguments)?  This was done without much thought, but since all of the
+    machine names are also valid annex names, it seems like maybe
+    purely postional arguments aren't the right thing either.  Another argument
+    in favor would be if we were being careful to be consistent/orthogonal
   across all our commands...
-- Add `hpc_annex_lifetime` to the startds for `annex status`'s convenience
-  (so that we can always say how long the annex has left, even if the local
-  universe job was removed or submitted on a different machine)?
-- Improve the job transforms in the metaknob.
-  - `ANNEX_TOKEN_DOMAIN = $(2:$(ANNEX_COLLECTOR))
-  - Replace the expression in the second (optional) transform with another
-    defaulted variable so that it can be tweaked more easily.
