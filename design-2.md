@@ -13,7 +13,7 @@ non-trivial, since it basically involves running your own glide-in pool.  Phase
 available to researchers with access to the OS Pool Access Point.
 
 This project is not presently intended to address other "bring-your-own"
-resources, such as PATh HTC allocations, although we it will probably be
+resources, such as PATh Facility allocations, although we it will probably be
 worthwhile to consider that (and those) resource(s) when improving the UI.
 
 ## Goals
